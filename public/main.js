@@ -2,13 +2,6 @@
 // MAIN.JS - Asosiy ilova logikasi (TO'LIQ)
 // ============================================================
 
-// ============================================================
-// API CONFIG - FAQAT BIR MARTA E'LON QILINADI
-// ============================================================
-if (typeof API_URL === 'undefined') {
-    var API_URL = window.location.origin + '/api';
-}
-
 function getToken() {
     return localStorage.getItem('jwt_token');
 }
