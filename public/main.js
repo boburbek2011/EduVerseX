@@ -1235,4 +1235,85 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// ============================================================
+// MAIN.JS - QO'SHIMCHA FUNKSIYALAR (main.js ga qo'shing)
+// ============================================================
+
+// ============================================================
+// OWNER TITLE TIKLASH
+// ============================================================
+async function restoreOwnerTitle() {
+    const user = getCurrentUser();
+    if (!user || !isOwner(user)) {
+        alert('❌ Faqat owner bu amalni bajarishi mumkin!');
+        return;
+    }
+    
+    try {
+        const response = await apiRequest(`/users/${user.id}/title`, {
+            method: 'PUT',
+            body: JSON.stringify({ title: 'title-owner' })
+        });
+        
+        if (!response) return;
+        const updatedUser = await response.json();
+        localStorage.setItem('app_current_user', JSON.stringify(updatedUser));
+        updateUI();
+        alert('👑 Owner title tiklandi!');
+        location.reload();
+    } catch (error) {
+        console.error('Restore owner title error:', error);
+        alert('Xatolik yuz berdi');
+    }
+}
+
+// ============================================================
+// OWNER CHAT FUNKSIYALARI
+// ============================================================
+async function pinGlobalMessage(messageId) {
+    if (!getCurrentUser() || !isOwner(getCurrentUser())) {
+        alert('❌ Faqat owner bu amalni bajarishi mumkin!');
+        return;
+    }
+    
+    try {
+        const response = await apiRequest(`/chat/global/${messageId}/pin`, {
+            method: 'PUT'
+        });
+        if (response) {
+            loadChatMessages();
+            alert('📌 Xabar pinlandi!');
+        }
+    } catch (error) {
+        console.error('Pin message error:', error);
+    }
+}
+
+async function muteUser(userId) {
+    if (!getCurrentUser() || !isOwner(getCurrentUser())) {
+        alert('❌ Faqat owner bu amalni bajarishi mumkin!');
+        return;
+    }
+    
+    try {
+        const response = await apiRequest(`/users/${userId}/mute`, {
+            method: 'PUT'
+        });
+        if (response) {
+            alert('🔇 Foydalanuvchi ovozsizlantirildi!');
+        }
+    } catch (error) {
+        console.error('Mute user error:', error);
+    }
+}
+
+// ============================================================
+// GLOBAL FUNKSIYALARNI EKSPORT QILISH
+// ============================================================
+window.restoreOwnerTitle = restoreOwnerTitle;
+window.pinGlobalMessage = pinGlobalMessage;
+window.muteUser = muteUser;
+window.isOwner = isOwner;
+
+console.log('✅ Main.js extra functions loaded!');
 console.log('✅ Main.js yuklandi!');
