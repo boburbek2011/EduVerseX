@@ -68,15 +68,6 @@ const missions = [
     { id: 5, title: "Mutaxassis", desc: "50 ta testni to'g'ri yeching", reward: "title-legendary", rewardName: "👑 Legendary", check: () => getCompletedTestCount() >= 50 }
 ];
 
-// Mission reward'lar
-const MISSION_TITLES = {
-    1: 'title-bronze',
-    2: 'title-silver', 
-    3: 'title-gold',
-    4: 'title-diamond',
-    5: 'title-legendary'
-};
-
 // ============================================================
 // FOYDALANUVCHI FUNKSIYALARI
 // ============================================================
@@ -93,10 +84,6 @@ function getCurrentUser() {
 
 function isOwner(user) {
     return user && user.is_owner === true;
-}
-
-function getAppUsers() {
-    return [];
 }
 
 function getTitleHTML(title) {
@@ -131,12 +118,11 @@ function getTitleDisplay(title) {
 // TITLE TANLASH - FAQAT BAJARILGAN MISSIYALAR ASOSIDA
 // ============================================================
 
-// Foydalanuvchi qaysi title'larni tanlashi mumkin?
 function getAvailableTitles() {
     const user = getCurrentUser();
     if (!user) return [];
     
-    // Owner bo'lsa hamma title'ni tanlay oladi
+    // OWNER bo'lsa hamma title'ni tanlay oladi
     if (isOwner(user)) {
         return [
             { id: 'title-default', name: '👤 Default' },
@@ -152,9 +138,9 @@ function getAvailableTitles() {
     // Oddiy foydalanuvchi - faqat bajarilgan mission title'larini tanlay oladi
     const available = [{ id: 'title-default', name: '👤 Default' }];
     
-    // Bajarilgan missiyalarni tekshirish
     missions.forEach(mission => {
-        if (completedMissions.includes(mission.id) && mission.reward) {
+        // ✅ title-owner ni oddiy foydalanuvchiga qo'shma!
+        if (completedMissions.includes(mission.id) && mission.reward && mission.reward !== 'title-owner') {
             available.push({
                 id: mission.reward,
                 name: mission.rewardName || mission.reward
@@ -165,7 +151,6 @@ function getAvailableTitles() {
     return available;
 }
 
-// Title tanlash modalini ochish
 function openTitleSelector() {
     const user = getCurrentUser();
     if (!user) {
@@ -188,7 +173,6 @@ function openTitleSelector() {
     renderTitleOptions();
 }
 
-// Title selector modal yaratish
 function createTitleSelectorModal() {
     if (document.getElementById('titleSelectorModal')) return;
     
@@ -208,7 +192,6 @@ function createTitleSelectorModal() {
     renderTitleOptions();
 }
 
-// Title variantlarini ko'rsatish
 function renderTitleOptions() {
     const container = document.getElementById('titleOptionsList');
     if (!container) return;
@@ -238,7 +221,6 @@ function renderTitleOptions() {
     
     html += available.map(title => {
         const isActive = currentTitle === title.id;
-        const isDefault = title.id === 'title-default';
         
         return `
             <div onclick="${isActive ? '' : `selectTitle('${title.id}')`}" style="
@@ -273,7 +255,6 @@ function renderTitleOptions() {
     container.innerHTML = html;
 }
 
-// Title tanlash
 async function selectTitle(titleId) {
     const user = getCurrentUser();
     if (!user) {
@@ -1225,7 +1206,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 500);
     
-    // Title selector modal uchun global funksiyalar
     window.openTitleSelector = openTitleSelector;
     window.selectTitle = selectTitle;
     window.getAvailableTitles = getAvailableTitles;
