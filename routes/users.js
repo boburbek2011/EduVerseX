@@ -1,20 +1,31 @@
 // ============================================================
-// ROUTES/USERS.JS - User management
+// ROUTES/USERS.JS - (TO'LIQ TUZATILGAN)
 // ============================================================
 
 const express = require('express');
 const router = express.Router();
-const { allQuery, getQuery, runQuery } = require('../database');
+const path = require('path');
 const { authenticate, isOwner } = require('../middleware/auth');
-const bcrypt = require('bcryptjs');
 
 // ============================================================
-// GET ALL USERS (with optional search)
+// ✅ Database ulanish - TO'G'RI
+// ============================================================
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+const dbPath = isProduction 
+    ? '/tmp/database.sqlite' 
+    : path.join(__dirname, '..', 'database.sqlite');
+
+// ✅ Database funksiyalarini olish
+const db = require('../database')(dbPath);
+const { getQuery, runQuery, allQuery } = db;
+
+// ============================================================
+// GET ALL USERS
 // ============================================================
 router.get('/', authenticate, async (req, res) => {
   const search = req.query.search || '';
   try {
-    let query = 'SELECT id, username, email, name, avatar, title, is_owner, is_banned, registered_at FROM users';
+    let query = `SELECT id, username, email, name, avatar, title, is_owner, is_banned, registered_at FROM users`;
     let params = [];
     if (search) {
       query += ' WHERE username LIKE ? OR name LIKE ? OR email LIKE ?';
@@ -38,9 +49,7 @@ router.get('/:id', authenticate, async (req, res) => {
       'SELECT id, username, email, name, avatar, title, is_owner, is_banned, registered_at FROM users WHERE id = ?',
       [req.params.id]
     );
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (error) {
     console.error('Get user error:', error);
@@ -49,7 +58,7 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // ============================================================
-// UPDATE USER
+// UPDATE USER - ✅ runQuery ishlatiladi
 // ============================================================
 router.put('/:id', authenticate, async (req, res) => {
   const { name, avatar, title } = req.body;
@@ -60,21 +69,10 @@ router.put('/:id', authenticate, async (req, res) => {
   }
 
   try {
-    let updates = [];
-    let params = [];
-
-    if (name) {
-      updates.push('name = ?');
-      params.push(name);
-    }
-    if (avatar) {
-      updates.push('avatar = ?');
-      params.push(avatar);
-    }
-    if (title && req.user.is_owner) {
-      updates.push('title = ?');
-      params.push(title);
-    }
+    let updates = [], params = [];
+    if (name) { updates.push('name = ?'); params.push(name); }
+    if (avatar) { updates.push('avatar = ?'); params.push(avatar); }
+    if (title && req.user.is_owner) { updates.push('title = ?'); params.push(title); }
 
     if (updates.length === 0) {
       return res.status(400).json({ error: 'No fields to update' });
@@ -130,47 +128,6 @@ router.put('/:id/title', authenticate, isOwner, async (req, res) => {
     res.json({ success: true, user });
   } catch (error) {
     console.error('Change title error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// ============================================================
-// GET USER STATS (favorites count, tests count, etc.)
-// ============================================================
-router.get('/:id/stats', authenticate, async (req, res) => {
-  const userId = parseInt(req.params.id);
-
-  try {
-    const favorites = await getQuery('SELECT COUNT(*) as count FROM favorites WHERE user_id = ?', [userId]);
-    const tests = await getQuery('SELECT COUNT(*) as count, SUM(correct) as correct, SUM(total) as total FROM test_results WHERE user_id = ?', [userId]);
-
-    res.json({
-      favorites: favorites?.count || 0,
-      tests: {
-        total: tests?.total || 0,
-        correct: tests?.correct || 0
-      }
-    });
-  } catch (error) {
-    console.error('Get stats error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// ============================================================
-// GET USER TEST RESULTS
-// ============================================================
-router.get('/:id/tests', authenticate, async (req, res) => {
-  const userId = parseInt(req.params.id);
-
-  try {
-    const results = await allQuery(
-      'SELECT subject, correct, wrong, unanswered, total, passed, completed_at FROM test_results WHERE user_id = ? ORDER BY completed_at DESC',
-      [userId]
-    );
-    res.json(results);
-  } catch (error) {
-    console.error('Get test results error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
