@@ -758,6 +758,14 @@
 <script src="/formula.js"></script>
 <script src="/tests.js"></script>
 <script src="/main.js"></script>
+<!-- main.html oxirida, script'lardan keyin -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof renderTests === 'function') {
+      renderTests();
+    }
+  });
+</script>
 
 </body>
 </html>
