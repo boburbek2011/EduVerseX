@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 O'yinlar - Fanlar Olami</title>
+    <title>🎮 O'yinlar - EduVerseX</title>
     <link rel="stylesheet" href="style.css">
     <style>
         body {
@@ -117,6 +117,7 @@
         .game-card .badge-difficulty.easy { background: #2ecc71; color: #0a0a0a; }
         .game-card .badge-difficulty.medium { background: #f39c12; color: #0a0a0a; }
         .game-card .badge-difficulty.hard { background: #e74c3c; color: white; }
+        .game-card .badge-difficulty.expert { background: #9b59b6; color: white; }
         
         .game-modal {
             display: none;
@@ -137,7 +138,7 @@
         .game-modal-content {
             background: #1a1a1a;
             border-radius: 20px;
-            max-width: 700px;
+            max-width: 750px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -178,7 +179,7 @@
             background: #0a0a0a;
             border-radius: 12px;
             padding: 20px;
-            min-height: 200px;
+            min-height: 250px;
             text-align: center;
         }
         .game-play-area .question-text {
@@ -202,9 +203,13 @@
             transition: 0.2s;
             font-size: 14px;
         }
-        .game-play-area .options-grid button:hover {
+        .game-play-area .options-grid button:hover:not(:disabled) {
             border-color: #4a6cf7;
             background: #252525;
+        }
+        .game-play-area .options-grid button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
         }
         .game-play-area .options-grid button.correct {
             border-color: #2ecc71;
@@ -262,6 +267,20 @@
             font-size: 13px;
             margin-top: 8px;
         }
+        .game-play-area .timer-display {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f39c12;
+            margin-bottom: 12px;
+        }
+        .game-play-area .timer-display.warning {
+            color: #e74c3c;
+            animation: blink 0.5s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
         .stats-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
@@ -308,6 +327,47 @@
             border-color: #4a6cf7;
             color: white;
         }
+        .game-play-area .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 16px 0;
+        }
+        .game-play-area .memory-card {
+            aspect-ratio: 1;
+            background: #252525;
+            border: 2px solid #333;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            cursor: pointer;
+            transition: 0.3s;
+            user-select: none;
+            min-height: 70px;
+        }
+        .game-play-area .memory-card:hover:not(.matched):not(.flipped) {
+            border-color: #4a6cf7;
+            transform: scale(1.05);
+        }
+        .game-play-area .memory-card.flipped {
+            background: #1a2a4a;
+            border-color: #4a6cf7;
+        }
+        .game-play-area .memory-card.matched {
+            background: #0a2a0a;
+            border-color: #2ecc71;
+            cursor: default;
+            opacity: 0.7;
+        }
+        .game-play-area .memory-card .card-content {
+            font-size: 32px;
+        }
+        .game-play-area .memory-card .card-back {
+            font-size: 24px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -318,7 +378,6 @@
         <button class="back-btn" onclick="window.history.back()">← Orqaga</button>
     </div>
 
-    <!-- Kategoriya filtri -->
     <div class="game-category-filter">
         <button class="active" data-cat="all" onclick="setGameCategory('all')">🎮 Hammasi</button>
         <button data-cat="quiz" onclick="setGameCategory('quiz')">❓ Viktorina</button>
@@ -327,259 +386,654 @@
         <button data-cat="timed" onclick="setGameCategory('timed')">⏱️ Vaqtli</button>
     </div>
 
-    <!-- O'yinlar grid -->
-    <div class="games-grid" id="gamesGrid">
-        <!-- JavaScript orqali to'ldiriladi -->
-    </div>
+    <div class="games-grid" id="gamesGrid"></div>
 </div>
 
-<!-- O'yin modal -->
 <div class="game-modal" id="gameModal">
     <div class="game-modal-content">
         <button class="close-game" onclick="closeGame()">✕</button>
         <span class="game-icon-modal" id="gameModalIcon">🎮</span>
         <h2 class="game-title-modal" id="gameModalTitle">O'yin</h2>
         <p class="game-desc-modal" id="gameModalDesc">O'yin tavsifi</p>
-        <div class="game-play-area" id="gamePlayArea">
-            <!-- O'yin mazmuni JavaScript orqali to'ldiriladi -->
-        </div>
+        <div class="game-play-area" id="gamePlayArea"></div>
     </div>
 </div>
 
 <script>
-    // O'yin ma'lumotlari
-    const gamesData = [
-        { 
-            id: 1, 
-            title: 'Fizika viktorinasi', 
-            icon: '⚛️', 
-            category: 'quiz',
-            desc: 'Fizika fanidan 15 ta savol. Qanchalik bilimsiz?',
-            difficulty: 'medium',
-            questions: [
-                { q: 'Nyutonning 1-qonuni qanday nomlanadi?', options: ['Inersiya qonuni', 'Gravitatsiya qonuni', 'Harakat qonuni', 'Energiya qonuni'], correct: 0 },
-                { q: 'Yorug\'lik tezligi qancha?', options: ['3×10⁸ m/s', '2×10⁸ m/s', '4×10⁸ m/s', '1×10⁸ m/s'], correct: 0 },
-                { q: 'Elektr zanjirida kuchlanish birligi?', options: ['Amper', 'Volt', 'Om', 'Vatt'], correct: 1 }
-            ]
-        },
-        { 
-            id: 2, 
-            title: 'Kimyo elementlari', 
-            icon: '🧪', 
-            category: 'quiz',
-            desc: 'Kimyoviy elementlar va ularning xossalari',
-            difficulty: 'hard',
-            questions: [
-                { q: 'Suvning kimyoviy formulasi?', options: ['H₂O', 'CO₂', 'NaCl', 'HCl'], correct: 0 },
-                { q: 'O\'yuvchi natriy formulasi?', options: ['NaOH', 'NaCl', 'Na₂CO₃', 'NaHCO₃'], correct: 0 }
-            ]
-        },
-        { 
-            id: 3, 
-            title: 'Matematika jumboq', 
-            icon: '🧩', 
-            category: 'puzzle',
-            desc: 'Matematik jumboqlar va topishmoqlar',
-            difficulty: 'medium',
-            questions: [
-                { q: '1+1=2, 2+2=4, 4+4=?', options: ['8', '16', '6', '10'], correct: 0 },
-                { q: 'Agar 3 ta olma 2 ta anor bilan birga 5 ta meva bo\'lsa, 6 ta olma necha meva?', options: ['6', '8', '10', '12'], correct: 0 }
-            ]
-        },
-        { 
-            id: 4, 
-            title: 'Xotira o\'yini', 
-            icon: '🧠', 
-            category: 'memory',
-            desc: 'Formulalarni eslab qoling va to\'g\'ri javob bering!',
-            difficulty: 'easy',
-            questions: [
-                { q: 'E = mc² formulasi kimga tegishli?', options: ['Eynshteyn', 'Nyuton', 'Plank', 'Bor'], correct: 0 },
-                { q: 'Pifagor teoremasi qaysi shaklga tegishli?', options: ['To\'g\'ri burchakli uchburchak', 'Doira', 'Kvadrat', 'Trapetsiya'], correct: 0 }
-            ]
-        },
-        { 
-            id: 5, 
-            title: 'Tarix viktorinasi', 
-            icon: '📜', 
-            category: 'quiz',
-            desc: 'Tarixiy shaxslar va voqealar haqida bilimingizni sinab ko\'ring',
-            difficulty: 'medium',
-            questions: [
-                { q: 'Amir Temur qaysi asrda yashagan?', options: ['XIV asr', 'XV asr', 'XIII asr', 'XVI asr'], correct: 0 },
-                { q: 'Buyuk ipak yo\'li qaysi davrda rivojlangan?', options: ['Mil.avv. II asr', 'Mil. I asr', 'Mil. V asr', 'Mil. X asr'], correct: 0 }
-            ]
-        },
-        { 
-            id: 6, 
-            title: 'Inglizcha so\'z o\'yini', 
-            icon: '🇬🇧', 
-            category: 'timed',
-            desc: 'Ingliz tilidagi so\'zlarning tarjimasini toping! Vaqt chegarasida',
-            difficulty: 'easy',
-            questions: [
-                { q: '"Book" so\'zining tarjimasi?', options: ['Kitob', 'Daftar', 'Qalam', 'Stol'], correct: 0 },
-                { q: '"School" so\'zining tarjimasi?', options: ['Maktab', 'Universitet', 'O\'quvchi', 'Dars'], correct: 0 }
-            ]
-        },
-        { 
-            id: 7, 
-            title: 'Astronomiya sirlari', 
-            icon: '🌌', 
-            category: 'quiz',
-            desc: 'Koinot va sayyoralar haqida bilimingizni sinab ko\'ring',
-            difficulty: 'hard',
-            questions: [
-                { q: 'Quyosh sistemasidagi eng katta sayyora?', options: ['Yupiter', 'Saturn', 'Uran', 'Neptun'], correct: 0 },
-                { q: 'Yerdan Oyga masofa qancha?', options: ['384,400 km', '200,000 km', '500,000 km', '100,000 km'], correct: 0 }
-            ]
-        },
-        { 
-            id: 8, 
-            title: 'Biologiya testi', 
-            icon: '🧬', 
-            category: 'quiz',
-            desc: 'Biologiyadan qiziqarli savollar',
-            difficulty: 'medium',
-            questions: [
-                { q: 'Inson tanasidagi eng katta a\'zo?', options: ['Teri', 'Yurak', 'Jigar', 'O\'pka'], correct: 0 },
-                { q: 'DNK ning to\'liq nomi?', options: ['Dezoksiribonuklein kislota', 'Dezoksiribonukleid kislota', 'Ribonuklein kislota', 'Ribonukleid kislota'], correct: 0 }
-            ]
-        }
-    ];
+// ============================================================
+// API CONFIG
+// ============================================================
+const API_URL = window.location.origin + '/api';
 
-    let currentGame = null;
-    let currentQuestionIndex = 0;
-    let score = 0;
-    let totalQuestions = 0;
-    let gameCategory = 'all';
+function getToken() {
+    return localStorage.getItem('jwt_token');
+}
 
-    function setGameCategory(cat) {
-        gameCategory = cat;
-        document.querySelectorAll('.game-category-filter button').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.cat === cat);
-        });
-        renderGames();
-    }
-
-    function renderGames() {
-        const grid = document.getElementById('gamesGrid');
-        
-        let filtered = gamesData;
-        if (gameCategory !== 'all') {
-            filtered = filtered.filter(g => g.category === gameCategory);
-        }
-        
-        grid.innerHTML = filtered.map(game => {
-            const diffClass = game.difficulty;
-            const diffLabel = { easy: 'Oson', medium: 'O\'rta', hard: 'Qiyin' }[game.difficulty] || 'O\'rta';
-            
-            return `
-                <div class="game-card" onclick="startGame(${game.id})">
-                    <span class="game-icon">${game.icon}</span>
-                    <span class="badge-difficulty ${diffClass}">${diffLabel}</span>
-                    <div class="game-title">${game.title}</div>
-                    <div class="game-desc">${game.desc}</div>
-                    <div class="game-stats">
-                        <span>❓ <strong>${game.questions.length}</strong> savol</span>
-                        <span>🏷️ ${game.category === 'quiz' ? 'Viktorina' : 
-                                game.category === 'memory' ? 'Xotira' : 
-                                game.category === 'puzzle' ? 'Jumboq' : 'Vaqtli'}</span>
-                    </div>
-                    <button class="play-btn" onclick="event.stopPropagation(); startGame(${game.id})">▶️ O\'ynash</button>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function startGame(gameId) {
-        const game = gamesData.find(g => g.id === gameId);
-        if (!game) return;
-        
-        currentGame = game;
-        currentQuestionIndex = 0;
-        score = 0;
-        totalQuestions = game.questions.length;
-        
-        document.getElementById('gameModalIcon').textContent = game.icon;
-        document.getElementById('gameModalTitle').textContent = game.title;
-        document.getElementById('gameModalDesc').textContent = game.desc;
-        document.getElementById('gameModal').classList.add('active');
-        
-        showQuestion();
-    }
-
-    function showQuestion() {
-        const area = document.getElementById('gamePlayArea');
-        if (!currentGame) return;
-        
-        if (currentQuestionIndex >= currentGame.questions.length) {
-            // O'yin tugadi
-            const pass = score >= Math.ceil(currentGame.questions.length / 2);
-            area.innerHTML = `
-                <div class="score-display">🎯 ${score}/${currentGame.questions.length} to'g'ri</div>
-                <div class="game-result ${pass ? 'win' : 'lose'}">
-                    ${pass ? '🎉 Tabriklaymiz! Siz yutdingiz!' : '😅 Qaytadan urinib ko\'ring!'}
-                </div>
-                <div style="font-size:14px;color:#888;margin-top:8px;">
-                    ${pass ? 'Siz bu fanni yaxshi bilasiz!' : 'Ko\'proq mashq qiling!'}
-                </div>
-                <button class="restart-btn" onclick="startGame(${currentGame.id})">🔄 Qayta o\'ynash</button>
-                <button class="next-btn" onclick="closeGame()">✕ Yopish</button>
-            `;
+async function saveGameResultToBackend(gameName, score, total) {
+    try {
+        const token = getToken();
+        if (!token) {
+            console.warn('⚠️ No token, game result not saved');
             return;
         }
         
-        const q = currentGame.questions[currentQuestionIndex];
-        area.innerHTML = `
-            <div class="score-display">❓ ${currentQuestionIndex + 1}/${currentGame.questions.length} · ⭐ ${score} ball</div>
-            <div class="question-text">${q.q}</div>
-            <div class="options-grid" id="optionsGrid">
-                ${q.options.map((opt, idx) => `
-                    <button onclick="answerQuestion(${idx})">${opt}</button>
-                `).join('')}
-            </div>
-            <div class="hint-text">💡 To'g'ri javobni tanlang</div>
-        `;
-    }
-
-    function answerQuestion(selected) {
-        const q = currentGame.questions[currentQuestionIndex];
-        const buttons = document.querySelectorAll('#optionsGrid button');
-        
-        buttons.forEach((btn, idx) => {
-            btn.disabled = true;
-            if (idx === q.correct) btn.classList.add('correct');
-            if (idx === selected && selected !== q.correct) btn.classList.add('wrong');
+        const response = await fetch('/api/users/test-result', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                subject: 'game_' + gameName.toLowerCase().replace(/\s/g, '_'),
+                correct: score,
+                wrong: total - score,
+                unanswered: 0,
+                total: total,
+                passed: score >= total / 2 ? 1 : 0
+            })
         });
         
-        if (selected === q.correct) {
-            score++;
+        if (response.ok) {
+            console.log('✅ Game result saved:', gameName, score, '/', total);
+        } else {
+            console.error('❌ Failed to save game result:', response.status);
         }
-        
-        // Keyingi savolga o'tish uchun tugma
-        const area = document.getElementById('gamePlayArea');
-        setTimeout(() => {
-            currentQuestionIndex++;
-            showQuestion();
-        }, 1200);
+    } catch (error) {
+        console.error('❌ Save game result error:', error);
     }
+}
 
-    function closeGame() {
-        document.getElementById('gameModal').classList.remove('active');
-        currentGame = null;
-        currentQuestionIndex = 0;
-        score = 0;
+// ============================================================
+// O'YIN MA'LUMOTLARI - 8 TA O'YIN
+// ============================================================
+const gamesData = [
+    // ========== 1. FIZIKA VIKTORINASI ==========
+    { 
+        id: 1, 
+        title: 'Fizika viktorinasi', 
+        icon: '⚛️', 
+        category: 'quiz',
+        desc: 'Fizika fanidan 15 ta savol. Qanchalik bilimsiz?',
+        difficulty: 'medium',
+        type: 'quiz',
+        timeLimit: 15,
+        questions: [
+            { q: 'Nyutonning 1-qonuni qanday nomlanadi?', options: ['Inersiya qonuni', 'Gravitatsiya qonuni', 'Harakat qonuni', 'Energiya qonuni'], correct: 0 },
+            { q: 'Yorug\'lik tezligi qancha?', options: ['3×10⁸ m/s', '2×10⁸ m/s', '4×10⁸ m/s', '1×10⁸ m/s'], correct: 0 },
+            { q: 'Elektr zanjirida kuchlanish birligi?', options: ['Amper', 'Volt', 'Om', 'Vatt'], correct: 1 },
+            { q: 'Elektr qarshilik birligi?', options: ['Om', 'Volt', 'Amper', 'Vatt'], correct: 0 },
+            { q: 'Quvvat birligi?', options: ['Vatt', 'Joul', 'Nyuton', 'Paskal'], correct: 0 },
+            { q: 'Energiya birligi?', options: ['Joul', 'Vatt', 'Nyuton', 'Paskal'], correct: 0 },
+            { q: 'Kuch birligi?', options: ['Nyuton', 'Joul', 'Vatt', 'Paskal'], correct: 0 },
+            { q: 'Bosim birligi?', options: ['Paskal', 'Nyuton', 'Joul', 'Vatt'], correct: 0 },
+            { q: 'Tezlik birligi?', options: ['m/s', 'm/s²', 'km/soat', 'm'], correct: 0 },
+            { q: 'Tezlanish birligi?', options: ['m/s²', 'm/s', 'km/soat', 'm'], correct: 0 },
+            { q: 'Ish formulasi?', options: ['A = F·s', 'A = m·v', 'A = m·g', 'A = q·U'], correct: 0 },
+            { q: 'Quvvat formulasi?', options: ['P = A/t', 'P = F·s', 'P = m·v', 'P = q·U'], correct: 0 },
+            { q: 'Kinetik energiya formulasi?', options: ['Ek = mv²/2', 'Ek = mgh', 'Ek = mc²', 'Ek = qU'], correct: 0 },
+            { q: 'Potensial energiya formulasi?', options: ['Ep = mgh', 'Ep = mv²/2', 'Ep = mc²', 'Ep = qU'], correct: 0 },
+            { q: 'Om qonuni?', options: ['U = IR', 'I = U/R', 'R = U/I', 'Hammasi to\'g\'ri'], correct: 3 }
+        ]
+    },
+    
+    // ========== 2. KIMYO ELEMENTLARI ==========
+    { 
+        id: 2, 
+        title: 'Kimyo elementlari', 
+        icon: '🧪', 
+        category: 'quiz',
+        desc: 'Kimyoviy elementlar va ularning xossalari - 12 savol',
+        difficulty: 'hard',
+        type: 'quiz',
+        timeLimit: 12,
+        questions: [
+            { q: 'Suvning kimyoviy formulasi?', options: ['H₂O', 'CO₂', 'NaCl', 'HCl'], correct: 0 },
+            { q: 'O\'yuvchi natriy formulasi?', options: ['NaOH', 'NaCl', 'Na₂CO₃', 'NaHCO₃'], correct: 0 },
+            { q: 'Tuz formulasi?', options: ['NaCl', 'NaOH', 'HCl', 'H₂SO₄'], correct: 0 },
+            { q: 'Karbonat angidrid formulasi?', options: ['CO₂', 'CO', 'C₂O', 'C₃O₂'], correct: 0 },
+            { q: 'Metan formulasi?', options: ['CH₄', 'C₂H₆', 'C₃H₈', 'C₄H₁₀'], correct: 0 },
+            { q: 'Etan formulasi?', options: ['C₂H₆', 'CH₄', 'C₃H₈', 'C₄H₁₀'], correct: 0 },
+            { q: 'Propan formulasi?', options: ['C₃H₈', 'CH₄', 'C₂H₆', 'C₄H₁₀'], correct: 0 },
+            { q: 'Butan formulasi?', options: ['C₄H₁₀', 'CH₄', 'C₂H₆', 'C₃H₈'], correct: 0 },
+            { q: 'Sulfat kislota formulasi?', options: ['H₂SO₄', 'HCl', 'HNO₃', 'H₂CO₃'], correct: 0 },
+            { q: 'Xlorid kislota formulasi?', options: ['HCl', 'H₂SO₄', 'HNO₃', 'H₂CO₃'], correct: 0 },
+            { q: 'Nitrat kislota formulasi?', options: ['HNO₃', 'HCl', 'H₂SO₄', 'H₂CO₃'], correct: 0 },
+            { q: 'Uglerod oksidi formulasi?', options: ['CO', 'CO₂', 'C₂O', 'C₃O₂'], correct: 0 }
+        ]
+    },
+    
+    // ========== 3. MATEMATIKA JUMBOQ ==========
+    { 
+        id: 3, 
+        title: 'Matematika jumboq', 
+        icon: '🧩', 
+        category: 'puzzle',
+        desc: 'Matematik jumboqlar va topishmoqlar - 12 savol',
+        difficulty: 'medium',
+        type: 'quiz',
+        timeLimit: 10,
+        questions: [
+            { q: '1+1=2, 2+2=4, 4+4=?', options: ['8', '16', '6', '10'], correct: 0 },
+            { q: 'Agar 3 ta olma 2 ta anor bilan birga 5 ta meva bo\'lsa, 6 ta olma necha meva?', options: ['6', '8', '10', '12'], correct: 0 },
+            { q: '2+3×4 = ?', options: ['14', '20', '24', '16'], correct: 0 },
+            { q: '(5+3)×2 = ?', options: ['16', '13', '18', '14'], correct: 0 },
+            { q: '10÷2+3 = ?', options: ['8', '6.5', '5', '10'], correct: 0 },
+            { q: 'Kvadratning perimetri 20 sm bo\'lsa, uning tomoni necha sm?', options: ['5 sm', '10 sm', '4 sm', '8 sm'], correct: 0 },
+            { q: 'To\'g\'ri to\'rtburchakning eni 5 sm, bo\'yi 8 sm bo\'lsa, yuzi necha sm²?', options: ['40 sm²', '26 sm²', '13 sm²', '80 sm²'], correct: 0 },
+            { q: 'Uchburchakning asosi 10 sm, balandligi 6 sm bo\'lsa, yuzi necha sm²?', options: ['30 sm²', '60 sm²', '16 sm²', '120 sm²'], correct: 0 },
+            { q: 'Aylana radiusi 5 sm bo\'lsa, diametri necha sm?', options: ['10 sm', '5 sm', '15 sm', '2.5 sm'], correct: 0 },
+            { q: 'Aylana uzunligi formulasi?', options: ['2πr', 'πr²', '2πr²', 'πr'], correct: 0 },
+            { q: 'Doira yuzi formulasi?', options: ['πr²', '2πr', '2πr²', 'πr'], correct: 0 },
+            { q: 'Pifagor teoremasi?', options: ['c² = a²+b²', 'c = a+b', 'c² = a²-b²', 'c = a·b'], correct: 0 }
+        ]
+    },
+    
+    // ========== 4. XOTIRA O'YINI ==========
+    { 
+        id: 4, 
+        title: 'Xotira o\'yini', 
+        icon: '🧠', 
+        category: 'memory',
+        desc: 'Formulalarni eslab qoling va to\'g\'ri javob bering! 8 juftlik',
+        difficulty: 'easy',
+        type: 'memory',
+        timeLimit: 60,
+        pairs: [
+            { a: 'E=mc²', b: 'Eynshteyn' },
+            { a: 'F=ma', b: 'Nyuton' },
+            { a: 'PV=nRT', b: 'Ideal gaz' },
+            { a: 'U=IR', b: 'Om qonuni' },
+            { a: 'πr²', b: 'Doira yuzi' },
+            { a: '2πr', b: 'Aylana uzunligi' },
+            { a: 'a²+b²=c²', b: 'Pifagor' },
+            { a: 'E=hν', b: 'Plank' }
+        ]
+    },
+    
+    // ========== 5. TARIX VIKTORINASI ==========
+    { 
+        id: 5, 
+        title: 'Tarix viktorinasi', 
+        icon: '📜', 
+        category: 'quiz',
+        desc: 'Tarixiy shaxslar va voqealar haqida bilimingizni sinab ko\'ring - 12 savol',
+        difficulty: 'medium',
+        type: 'quiz',
+        timeLimit: 12,
+        questions: [
+            { q: 'Amir Temur qaysi asrda yashagan?', options: ['XIV asr', 'XV asr', 'XIII asr', 'XVI asr'], correct: 0 },
+            { q: 'Buyuk ipak yo\'li qaysi davrda rivojlangan?', options: ['Mil.avv. II asr', 'Mil. I asr', 'Mil. V asr', 'Mil. X asr'], correct: 0 },
+            { q: 'Ikkinchi jahon urushi qachon boshlangan?', options: ['1939', '1941', '1945', '1937'], correct: 0 },
+            { q: 'Birinchi jahon urushi qachon boshlangan?', options: ['1914', '1918', '1912', '1920'], correct: 0 },
+            { q: 'O\'zbekiston qachon mustaqil bo\'lgan?', options: ['1991', '1992', '1990', '1993'], correct: 0 },
+            { q: 'Amir Temur qachon vafot etgan?', options: ['1405', '1400', '1410', '1395'], correct: 0 },
+            { q: 'Buyuk Fransuz inqilobi qachon bo\'lgan?', options: ['1789', '1799', '1776', '1804'], correct: 0 },
+            { q: 'Amerika mustaqilligi qachon e\'lon qilingan?', options: ['1776', '1789', '1799', '1804'], correct: 0 },
+            { q: 'Rim imperiyasi qachon qulagan?', options: ['476', '476', '476', '476'], correct: 0 },
+            { q: 'Kristofor Kolumb Amerikani qachon kashf etgan?', options: ['1492', '1498', '1500', '1482'], correct: 0 },
+            { q: 'Sovet Ittifoqi qachon parchalanib ketgan?', options: ['1991', '1990', '1992', '1989'], correct: 0 },
+            { q: 'Buyuk Britaniya qirolichasi Yelizaveta II qachon taxtga o\'tirgan?', options: ['1952', '1953', '1954', '1951'], correct: 0 }
+        ]
+    },
+    
+    // ========== 6. INGLIZCHA SO'Z O'YINI ==========
+    { 
+        id: 6, 
+        title: 'Inglizcha so\'z o\'yini', 
+        icon: '🇬🇧', 
+        category: 'timed',
+        desc: 'Ingliz tilidagi so\'zlarning tarjimasini toping! 12 ta so\'z',
+        difficulty: 'easy',
+        type: 'quiz',
+        timeLimit: 10,
+        questions: [
+            { q: '"Book" so\'zining tarjimasi?', options: ['Kitob', 'Daftar', 'Qalam', 'Stol'], correct: 0 },
+            { q: '"School" so\'zining tarjimasi?', options: ['Maktab', 'Universitet', 'O\'quvchi', 'Dars'], correct: 0 },
+            { q: '"Teacher" so\'zining tarjimasi?', options: ['O\'qituvchi', 'O\'quvchi', 'Direktor', 'Talaba'], correct: 0 },
+            { q: '"Student" so\'zining tarjimasi?', options: ['Talaba', 'O\'qituvchi', 'O\'quvchi', 'Direktor'], correct: 0 },
+            { q: '"Apple" so\'zining tarjimasi?', options: ['Olma', 'Nok', 'Uzum', 'Banan'], correct: 0 },
+            { q: '"Water" so\'zining tarjimasi?', options: ['Suv', 'Sharbat', 'Sut', 'Choy'], correct: 0 },
+            { q: '"Love" so\'zining tarjimasi?', options: ['Sevgi', 'Nafrat', 'Do\'stlik', 'Quvonch'], correct: 0 },
+            { q: '"Happy" so\'zining tarjimasi?', options: ['Baxtli', 'G\'amgin', 'Qayg\'uli', 'Xafa'], correct: 0 },
+            { q: '"Big" so\'zining tarjimasi?', options: ['Katta', 'Kichik', 'Uzun', 'Qisqa'], correct: 0 },
+            { q: '"Small" so\'zining tarjimasi?', options: ['Kichik', 'Katta', 'Uzun', 'Qisqa'], correct: 0 },
+            { q: '"Beautiful" so\'zining tarjimasi?', options: ['Go\'zal', 'Xunuk', 'Yangi', 'Eski'], correct: 0 },
+            { q: '"Friend" so\'zining tarjimasi?', options: ['Do\'st', 'Dushman', 'O\'qituvchi', 'Talaba'], correct: 0 }
+        ]
+    },
+    
+    // ========== 7. ASTRONOMIYA SIRLARI ==========
+    { 
+        id: 7, 
+        title: 'Astronomiya sirlari', 
+        icon: '🌌', 
+        category: 'quiz',
+        desc: 'Koinot va sayyoralar haqida bilimingizni sinab ko\'ring - 12 savol',
+        difficulty: 'hard',
+        type: 'quiz',
+        timeLimit: 12,
+        questions: [
+            { q: 'Quyosh sistemasidagi eng katta sayyora?', options: ['Yupiter', 'Saturn', 'Uran', 'Neptun'], correct: 0 },
+            { q: 'Yerdan Oyga masofa qancha?', options: ['384,400 km', '200,000 km', '500,000 km', '100,000 km'], correct: 0 },
+            { q: 'Quyosh sistemasida nechta sayyora bor?', options: ['8', '9', '7', '10'], correct: 0 },
+            { q: 'Eng yorqin yulduz?', options: ['Sirius', 'Quyosh', 'Vega', 'Polaris'], correct: 0 },
+            { q: 'Yerdan Quyoshgacha masofa qancha?', options: ['149.6 mln km', '100 mln km', '200 mln km', '50 mln km'], correct: 0 },
+            { q: 'Yer necha kunda Quyosh atrofida aylanadi?', options: ['365 kun', '365.25 kun', '365.5 kun', '366 kun'], correct: 1 },
+            { q: 'Oy necha kunda Yer atrofida aylanadi?', options: ['27.3 kun', '29.5 kun', '30 kun', '31 kun'], correct: 0 },
+            { q: 'Eng kichik sayyora?', options: ['Merkuriy', 'Mars', 'Venera', 'Pluton'], correct: 0 },
+            { q: 'Eng issiq sayyora?', options: ['Venera', 'Merkuriy', 'Mars', 'Yupiter'], correct: 0 },
+            { q: 'Qaysi sayyora halqalarga ega?', options: ['Saturn', 'Yupiter', 'Uran', 'Neptun'], correct: 0 },
+            { q: 'Yulduzlar qanday energiya chiqaradi?', options: ['Yadro sintezi', 'Yadro parchalanishi', 'Kimyoviy reaksiya', 'Mexanik energiya'], correct: 0 },
+            { q: 'Koinotning yoshi qancha?', options: ['13.8 mlrd yil', '10 mlrd yil', '20 mlrd yil', '5 mlrd yil'], correct: 0 }
+        ]
+    },
+    
+    // ========== 8. BIOLOGIYA TESTI ==========
+    { 
+        id: 8, 
+        title: 'Biologiya testi', 
+        icon: '🧬', 
+        category: 'quiz',
+        desc: 'Biologiyadan qiziqarli savollar - 12 ta',
+        difficulty: 'medium',
+        type: 'quiz',
+        timeLimit: 12,
+        questions: [
+            { q: 'Inson tanasidagi eng katta a\'zo?', options: ['Teri', 'Yurak', 'Jigar', 'O\'pka'], correct: 0 },
+            { q: 'DNK ning to\'liq nomi?', options: ['Dezoksiribonuklein kislota', 'Dezoksiribonukleid kislota', 'Ribonuklein kislota', 'Ribonukleid kislota'], correct: 0 },
+            { q: 'Inson tanasida nechta xromosoma bor?', options: ['46', '48', '44', '50'], correct: 0 },
+            { q: 'Yurak necha kamerali?', options: ['4', '2', '3', '5'], correct: 0 },
+            { q: 'O\'pka vazifasi?', options: ['Nafas olish', 'Qon aylanish', 'Hazm qilish', 'Siydik chiqarish'], correct: 0 },
+            { q: 'Jigar vazifasi?', options: ['Detoksikatsiya', 'Nafas olish', 'Qon aylanish', 'Hazm qilish'], correct: 0 },
+            { q: 'Buyrak vazifasi?', options: ['Qonni tozalash', 'Nafas olish', 'Hazm qilish', 'Qon aylanish'], correct: 0 },
+            { q: 'Inson miyasida nechta neyron bor?', options: ['100 mlrd', '10 mlrd', '1 mlrd', '1000 mlrd'], correct: 0 },
+            { q: 'Qon guruhi necha xil?', options: ['4', '2', '3', '5'], correct: 0 },
+            { q: 'Eng katta hujayra?', options: ['Tuxum hujayra', 'Neyron', 'Muskul hujayra', 'Qon hujayra'], correct: 0 },
+            { q: 'Eng kichik hujayra?', options: ['Spermatozoid', 'Tuxum hujayra', 'Neyron', 'Muskul hujayra'], correct: 0 },
+            { q: 'Fotosintez qayerda sodir bo\'ladi?', options: ['Xloroplast', 'Mitoxondriya', 'Yadro', 'Ribosoma'], correct: 0 }
+        ]
     }
+];
 
-    // Boshlang'ich render
-    renderGames();
+// ============================================================
+// O'YIN HOLATI
+// ============================================================
+let currentGame = null;
+let currentQuestionIndex = 0;
+let score = 0;
+let totalQuestions = 0;
+let gameCategory = 'all';
+let timerInterval = null;
+let timeLeft = 0;
+let memoryCards = [];
+let flippedCards = [];
+let matchedPairs = 0;
+let isProcessing = false;
 
-    // Modalni tashqariga bosib yopish
-    document.getElementById('gameModal').addEventListener('click', function(e) {
-        if (e.target === this) closeGame();
+// ============================================================
+// FILTER
+// ============================================================
+function setGameCategory(cat) {
+    gameCategory = cat;
+    document.querySelectorAll('.game-category-filter button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.cat === cat);
     });
-</script>
+    renderGames();
+}
 
+// ============================================================
+// O'YINLARNI RENDER QILISH
+// ============================================================
+function renderGames() {
+    const grid = document.getElementById('gamesGrid');
+    
+    let filtered = gamesData;
+    if (gameCategory !== 'all') {
+        filtered = filtered.filter(g => g.category === gameCategory);
+    }
+    
+    grid.innerHTML = filtered.map(game => {
+        const diffClass = game.difficulty;
+        const diffLabel = { easy: 'Oson', medium: 'O\'rta', hard: 'Qiyin', expert: 'Mutaxassis' }[game.difficulty] || 'O\'rta';
+        const questionCount = game.questions ? game.questions.length : (game.pairs ? game.pairs.length : 0);
+        
+        return `
+            <div class="game-card" onclick="startGame(${game.id})">
+                <span class="game-icon">${game.icon}</span>
+                <span class="badge-difficulty ${diffClass}">${diffLabel}</span>
+                <div class="game-title">${game.title}</div>
+                <div class="game-desc">${game.desc}</div>
+                <div class="game-stats">
+                    <span>❓ <strong>${questionCount}</strong> savol</span>
+                    <span>🏷️ ${game.category === 'quiz' ? 'Viktorina' : game.category === 'memory' ? 'Xotira' : game.category === 'puzzle' ? 'Jumboq' : 'Vaqtli'}</span>
+                </div>
+                <button class="play-btn" onclick="event.stopPropagation(); startGame(${game.id})">▶️ O\'ynash</button>
+            </div>
+        `;
+    }).join('');
+}
+
+// ============================================================
+// O'YINNI BOSHLASH
+// ============================================================
+function startGame(gameId) {
+    const game = gamesData.find(g => g.id === gameId);
+    if (!game) return;
+    
+    currentGame = game;
+    currentQuestionIndex = 0;
+    score = 0;
+    totalQuestions = game.questions ? game.questions.length : (game.pairs ? game.pairs.length : 0);
+    flippedCards = [];
+    matchedPairs = 0;
+    isProcessing = false;
+    
+    document.getElementById('gameModalIcon').textContent = game.icon;
+    document.getElementById('gameModalTitle').textContent = game.title;
+    document.getElementById('gameModalDesc').textContent = game.desc;
+    document.getElementById('gameModal').classList.add('active');
+    
+    if (game.type === 'memory') {
+        startMemoryGame();
+    } else {
+        showQuestion();
+    }
+}
+
+// ============================================================
+// XOTIRA O'YINI
+// ============================================================
+function startMemoryGame() {
+    const area = document.getElementById('gamePlayArea');
+    const pairs = currentGame.pairs;
+    
+    // Kartalarni yaratish
+    memoryCards = [];
+    pairs.forEach((pair, idx) => {
+        memoryCards.push({ id: idx * 2, pairId: idx, content: pair.a, matched: false, flipped: false });
+        memoryCards.push({ id: idx * 2 + 1, pairId: idx, content: pair.b, matched: false, flipped: false });
+    });
+    
+    // Tasodifiy aralashtirish
+    for (let i = memoryCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [memoryCards[i], memoryCards[j]] = [memoryCards[j], memoryCards[i]];
+    }
+    
+    area.innerHTML = `
+        <div class="score-display">🧠 Xotira o'yini - ${pairs.length} juftlik toping!</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+            <div>✅ Topilgan: <span id="memoryScore">0</span>/${pairs.length}</div>
+            <div>⏱️ <span id="memoryTimer">${currentGame.timeLimit || 60}</span>s</div>
+            <div>🔀 Harakatlar: <span id="memoryMoves">0</span></div>
+        </div>
+        <div class="memory-grid" id="memoryGrid"></div>
+        <div id="memoryMessage" style="margin-top:12px;color:#888;"></div>
+    `;
+    
+    const grid = document.getElementById('memoryGrid');
+    let moves = 0;
+    const totalPairs = memoryCards.length / 2;
+    let matched = 0;
+    
+    // Kartalarni render qilish
+    memoryCards.forEach((card, index) => {
+        const div = document.createElement('div');
+        div.className = 'memory-card';
+        div.dataset.index = index;
+        div.innerHTML = `<div class="card-back">❓</div>`;
+        div.onclick = () => flipCard(index);
+        grid.appendChild(div);
+    });
+    
+    // Timer
+    timeLeft = currentGame.timeLimit || 60;
+    const timerEl = document.getElementById('memoryTimer');
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timerEl) {
+            timerEl.textContent = timeLeft;
+            if (timeLeft <= 10) timerEl.className = 'timer-display warning';
+        }
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            document.querySelectorAll('.memory-card').forEach(el => el.style.pointerEvents = 'none');
+            document.getElementById('memoryMessage').innerHTML = `
+                <div class="game-result lose">⏰ Vaqt tugadi! ${matched}/${totalPairs} juftlik topildi</div>
+                <button class="restart-btn" onclick="startGame(${currentGame.id})">🔄 Qayta o'ynash</button>
+                <button class="next-btn" onclick="closeGame()">✕ Yopish</button>
+            `;
+            saveGameResultToBackend(currentGame.title, matched, totalPairs);
+        }
+    }, 1000);
+    
+    // Kartani ochish funksiyasi
+    window.flipCard = function(index) {
+        if (isProcessing) return;
+        const card = memoryCards[index];
+        if (card.flipped || card.matched) return;
+        
+        card.flipped = true;
+        const el = document.querySelector(`.memory-card[data-index="${index}"]`);
+        el.classList.add('flipped');
+        el.innerHTML = `<div class="card-content">${card.content}</div>`;
+        
+        flippedCards.push(index);
+        moves++;
+        document.getElementById('memoryMoves').textContent = moves;
+        
+        if (flippedCards.length === 2) {
+            isProcessing = true;
+            const idx1 = flippedCards[0];
+            const idx2 = flippedCards[1];
+            const card1 = memoryCards[idx1];
+            const card2 = memoryCards[idx2];
+            
+            if (card1.pairId === card2.pairId && idx1 !== idx2) {
+                // To'g'ri juftlik
+                card1.matched = true;
+                card2.matched = true;
+                matched++;
+                document.getElementById('memoryScore').textContent = matched;
+                
+                document.querySelector(`.memory-card[data-index="${idx1}"]`).classList.add('matched');
+                document.querySelector(`.memory-card[data-index="${idx2}"]`).classList.add('matched');
+                
+                flippedCards = [];
+                isProcessing = false;
+                
+                if (matched === totalPairs) {
+                    clearInterval(timerInterval);
+                    document.getElementById('memoryMessage').innerHTML = `
+                        <div class="game-result win">🎉 Tabriklaymiz! Barcha ${totalPairs} juftlikni topdingiz!</div>
+                        <button class="restart-btn" onclick="startGame(${currentGame.id})">🔄 Qayta o'ynash</button>
+                        <button class="next-btn" onclick="closeGame()">✕ Yopish</button>
+                    `;
+                    saveGameResultToBackend(currentGame.title, matched, totalPairs);
+                }
+            } else {
+                // Noto'g'ri
+                setTimeout(() => {
+                    card1.flipped = false;
+                    card2.flipped = false;
+                    document.querySelector(`.memory-card[data-index="${idx1}"]`).classList.remove('flipped');
+                    document.querySelector(`.memory-card[data-index="${idx2}"]`).classList.remove('flipped');
+                    document.querySelector(`.memory-card[data-index="${idx1}"]`).innerHTML = `<div class="card-back">❓</div>`;
+                    document.querySelector(`.memory-card[data-index="${idx2}"]`).innerHTML = `<div class="card-back">❓</div>`;
+                    flippedCards = [];
+                    isProcessing = false;
+                }, 800);
+            }
+        }
+    };
+}
+
+// ============================================================
+// SAVOL KO'RSATISH (VIKTORINA)
+// ============================================================
+function showQuestion() {
+    const area = document.getElementById('gamePlayArea');
+    if (!currentGame || !currentGame.questions) return;
+    
+    if (currentQuestionIndex >= currentGame.questions.length) {
+        finishQuiz();
+        return;
+    }
+    
+    const q = currentGame.questions[currentQuestionIndex];
+    const total = currentGame.questions.length;
+    
+    // Timer
+    timeLeft = currentGame.timeLimit || 15;
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        const timerEl = document.getElementById('quizTimer');
+        if (timerEl) {
+            timerEl.textContent = timeLeft;
+            if (timeLeft <= 5) timerEl.className = 'timer-display warning';
+        }
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            // Vaqt tugadi - keyingi savol
+            answerQuestion(-1);
+        }
+    }, 1000);
+    
+    area.innerHTML = `
+        <div class="score-display">
+            ❓ ${currentQuestionIndex + 1}/${total} · ⭐ ${score} ball
+            <span style="margin-left:20px;color:#f39c12;">⏱️ <span id="quizTimer" class="timer-display">${timeLeft}</span>s</span>
+        </div>
+        <div class="question-text">${q.q}</div>
+        <div class="options-grid" id="optionsGrid">
+            ${q.options.map((opt, idx) => `
+                <button onclick="answerQuestion(${idx})">${String.fromCharCode(65 + idx)}) ${opt}</button>
+            `).join('')}
+        </div>
+        <div class="hint-text">💡 To'g'ri javobni tanlang</div>
+    `;
+}
+
+// ============================================================
+// JAVOB BERISH
+// ============================================================
+function answerQuestion(selected) {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    const q = currentGame.questions[currentQuestionIndex];
+    const buttons = document.querySelectorAll('#optionsGrid button');
+    
+    buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === q.correct) btn.classList.add('correct');
+        if (idx === selected && selected !== q.correct) btn.classList.add('wrong');
+    });
+    
+    if (selected === q.correct) {
+        score++;
+        showNotification('✅ To\'g\'ri!', 'success');
+    } else if (selected !== -1) {
+        showNotification('❌ Noto\'g\'ri!', 'error');
+    } else {
+        showNotification('⏰ Vaqt tugadi!', 'error');
+    }
+    
+    setTimeout(() => {
+        currentQuestionIndex++;
+        showQuestion();
+    }, 1500);
+}
+
+// ============================================================
+// VIKTORINANI YAKUNLASH
+// ============================================================
+function finishQuiz() {
+    const area = document.getElementById('gamePlayArea');
+    const total = currentGame.questions.length;
+    const percentage = Math.round((score / total) * 100);
+    const passed = percentage >= 60;
+    
+    area.innerHTML = `
+        <div class="score-display">🎯 ${score}/${total} to'g'ri (${percentage}%)</div>
+        <div class="game-result ${passed ? 'win' : 'lose'}">
+            ${passed ? '🎉 Tabriklaymiz! Siz yutdingiz!' : '😅 Qaytadan urinib ko\'ring!'}
+        </div>
+        <div style="font-size:14px;color:#888;margin-top:8px;">
+            ${passed ? 'Siz bu fanni yaxshi bilasiz!' : 'Ko\'proq mashq qiling!'}
+        </div>
+        <button class="restart-btn" onclick="startGame(${currentGame.id})">🔄 Qayta o\'ynash</button>
+        <button class="next-btn" onclick="closeGame()">✕ Yopish</button>
+    `;
+    
+    saveGameResultToBackend(currentGame.title, score, total);
+}
+
+// ============================================================
+// O'YINNI YOPISH
+// ============================================================
+function closeGame() {
+    if (timerInterval) clearInterval(timerInterval);
+    document.getElementById('gameModal').classList.remove('active');
+    currentGame = null;
+    currentQuestionIndex = 0;
+    score = 0;
+    flippedCards = [];
+    matchedPairs = 0;
+    isProcessing = false;
+}
+
+// ============================================================
+// NOTIFICATION
+// ============================================================
+function showNotification(message, type) {
+    const existing = document.querySelector('.game-notification');
+    if (existing) existing.remove();
+
+    const notification = document.createElement('div');
+    notification.className = 'game-notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: rgba(10, 10, 10, 0.95);
+        border: 2px solid ${type === 'error' ? '#e74c3c' : '#2ecc71'};
+        border-radius: 10px;
+        color: ${type === 'error' ? '#e74c3c' : '#2ecc71'};
+        font-weight: bold;
+        z-index: 9999;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        font-size:14px;
+    `;
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 10);
+
+    setTimeout(() => {
+        notification.style.transform = 'translateX(400px)';
+        setTimeout(() => notification.remove(), 300);
+    }, 2000);
+}
+
+// ============================================================
+// BOSHLANG'ICH RENDER
+// ============================================================
+renderGames();
+
+// Modalni tashqariga bosib yopish
+document.getElementById('gameModal').addEventListener('click', function(e) {
+    if (e.target === this) closeGame();
+});
+
+console.log('✅ Games.js yuklandi! Jami o\'yinlar:', gamesData.length);
+</script>
 </body>
 </html>
