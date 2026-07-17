@@ -1,21 +1,31 @@
 // ============================================================
-// ROUTES/AUTH.JS - Authentication routes
+// ROUTES/AUTH.JS - Authentication routes (TUZATILGAN)
 // ============================================================
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
-const { runQuery, getQuery } = require('../database');
-const { generateToken } = require('../middleware/auth');
+const { generateToken, authenticate } = require('../middleware/auth');
+
+// Database funksiyalarini req dan olish
+const getDb = () => {
+  const { runQuery, getQuery, allQuery } = require('../database')(process.env.NODE_ENV === 'production' ? '/tmp/database.sqlite' : './database.sqlite');
+  return { runQuery, getQuery, allQuery };
+};
 
 // ============================================================
 // REGISTER
 // ============================================================
 router.post('/register', async (req, res) => {
   const { username, email, password, name } = req.body;
+  const { getQuery, runQuery } = getDb();
 
   if (!username || !email || !password) {
     return res.status(400).json({ error: 'All fields required' });
+  }
+
+  if (username.length < 3) {
+    return res.status(400).json({ error: 'Username must be at least 3 characters' });
   }
 
   if (password.length < 6) {
@@ -27,7 +37,6 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    // Check if user exists
     const existing = await getQuery('SELECT id FROM users WHERE username = ? OR email = ?', [username, email]);
     if (existing) {
       return res.status(400).json({ error: 'Username or email already exists' });
@@ -35,8 +44,8 @@ router.post('/register', async (req, res) => {
 
     const hashedPassword = bcrypt.hashSync(password, 10);
     const result = await runQuery(
-      'INSERT INTO users (username, email, password, name) VALUES (?, ?, ?, ?)',
-      [username, email, hashedPassword, name || username]
+      'INSERT INTO users (username, email, password, name, title) VALUES (?, ?, ?, ?, ?)',
+      [username, email, hashedPassword, name || username, 'title-default']
     );
 
     const user = await getQuery('SELECT * FROM users WHERE id = ?', [result.lastID]);
@@ -50,8 +59,10 @@ router.post('/register', async (req, res) => {
         username: user.username,
         email: user.email,
         name: user.name,
+        avatar: user.avatar,
         title: user.title,
-        is_owner: user.is_owner === 1
+        is_owner: user.is_owner === 1,
+        registered_at: user.registered_at
       }
     });
   } catch (error) {
@@ -65,6 +76,7 @@ router.post('/register', async (req, res) => {
 // ============================================================
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
+  const { getQuery } = getDb();
 
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password required' });
@@ -108,41 +120,17 @@ router.post('/login', async (req, res) => {
 });
 
 // ============================================================
-// ME (get current user)
+// GET CURRENT USER (ME)
 // ============================================================
-router.get('/me', async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'No token provided' });
-  }
+router.get('/me', authenticate, async (req, res) => {
+  res.json(req.user);
+});
 
-  const token = authHeader.substring(7);
-  const decoded = require('../middleware/auth').verifyToken(token);
-  if (!decoded) {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
-
-  try {
-    const user = await getQuery('SELECT * FROM users WHERE id = ?', [decoded.id]);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.json({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      name: user.name,
-      avatar: user.avatar,
-      title: user.title,
-      is_owner: user.is_owner === 1,
-      is_banned: user.is_banned === 1,
-      registered_at: user.registered_at
-    });
-  } catch (error) {
-    console.error('Me error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
+// ============================================================
+// LOGOUT
+// ============================================================
+router.post('/logout', authenticate, async (req, res) => {
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 module.exports = router;
