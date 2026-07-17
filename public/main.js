@@ -2,6 +2,13 @@
 // MAIN.JS - Asosiy ilova logikasi (TO'LIQ)
 // ============================================================
 
+// ============================================================
+// API CONFIG - FAQAT BIR MARTA E'LON QILINADI
+// ============================================================
+if (typeof API_URL === 'undefined') {
+    var API_URL = window.location.origin + '/api';
+}
+
 function getToken() {
     return localStorage.getItem('jwt_token');
 }
@@ -37,6 +44,22 @@ async function apiRequest(endpoint, options = {}) {
     }
 
     return response;
+}
+
+// ============================================================
+// GLOBAL FUNKSIYALAR
+// ============================================================
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar && overlay) {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    }
+}
+
+function isOwner(user) {
+    return user && user.is_owner === true;
 }
 
 // ============================================================
@@ -77,10 +100,6 @@ function getCurrentUser() {
     }
 }
 
-function isOwner(user) {
-    return user && user.is_owner === true;
-}
-
 function getTitleHTML(title) {
     const titleNames = {
         'title-default': '👤 Default',
@@ -110,14 +129,12 @@ function getTitleDisplay(title) {
 }
 
 // ============================================================
-// TITLE TANLASH - FAQAT BAJARILGAN MISSIYALAR ASOSIDA
+// TITLE TANLASH
 // ============================================================
-
 function getAvailableTitles() {
     const user = getCurrentUser();
     if (!user) return [];
     
-    // OWNER bo'lsa hamma title'ni tanlay oladi
     if (isOwner(user)) {
         return [
             { id: 'title-default', name: '👤 Default' },
@@ -130,11 +147,9 @@ function getAvailableTitles() {
         ];
     }
     
-    // Oddiy foydalanuvchi - faqat bajarilgan mission title'larini tanlay oladi
     const available = [{ id: 'title-default', name: '👤 Default' }];
     
     missions.forEach(mission => {
-        // ✅ title-owner ni oddiy foydalanuvchiga qo'shma!
         if (completedMissions.includes(mission.id) && mission.reward && mission.reward !== 'title-owner') {
             available.push({
                 id: mission.reward,
@@ -285,6 +300,34 @@ async function selectTitle(titleId) {
 }
 
 // ============================================================
+// OWNER TITLE TIKLASH
+// ============================================================
+async function restoreOwnerTitle() {
+    const user = getCurrentUser();
+    if (!user || !isOwner(user)) {
+        alert('❌ Faqat owner bu amalni bajarishi mumkin!');
+        return;
+    }
+    
+    try {
+        const response = await apiRequest(`/users/${user.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ title: 'title-owner' })
+        });
+        
+        if (!response) return;
+        const updatedUser = await response.json();
+        localStorage.setItem('app_current_user', JSON.stringify(updatedUser));
+        updateUI();
+        alert('👑 Owner title tiklandi!');
+        location.reload();
+    } catch (error) {
+        console.error('Restore owner title error:', error);
+        alert('Xatolik yuz berdi');
+    }
+}
+
+// ============================================================
 // LOCALSTORAGE YORDAMCHI FUNKSIYALAR
 // ============================================================
 
@@ -313,9 +356,6 @@ function loadState() {
     } catch(e) { console.warn('LocalStorage xato:', e); }
 }
 
-// ============================================================
-// GET COMPLETED TEST COUNT
-// ============================================================
 function getCompletedTestCount() {
     let completed = 0;
     if (typeof allTests !== 'undefined') {
@@ -717,15 +757,6 @@ function closeModal(id) {
     if (modal) modal.classList.add('hidden');
 }
 
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    if (sidebar && overlay) {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-    }
-}
-
 // ============================================================
 // NAVIGATSIYA
 // ============================================================
@@ -748,15 +779,16 @@ function showTestsView() {
     const formulasView = document.getElementById('formulasView');
     const calculatorView = document.getElementById('formulaCalculatorView');
 
-    if (testsView) testsView.style.display = 'block';
+    if (testsView) {
+        testsView.style.display = 'block';
+        if (typeof renderTests === 'function') {
+            renderTests();
+            console.log('✅ Tests rendered in showTestsView()');
+        }
+    }
     if (menuGrid) menuGrid.style.display = 'none';
     if (formulasView) formulasView.style.display = 'none';
     if (calculatorView) calculatorView.style.display = 'none';
-
-    if (typeof renderTests === 'function') {
-        renderTests();
-        console.log('✅ Tests rendered in showTestsView()');
-    }
 }
 
 function showSubject(subjectKey) {
@@ -1189,6 +1221,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (logoutBtn) logoutBtn.style.display = 'flex';
     }
     
+    // formula.js yuklanganligini tekshirish
+    if (typeof subjectInfo === 'undefined') {
+        console.warn('⚠️ subjectInfo not found! Loading formula.js...');
+        const script = document.createElement('script');
+        script.src = 'formula.js';
+        script.onload = () => {
+            console.log('✅ formula.js loaded!');
+            updateFormulaCounts();
+        };
+        document.head.appendChild(script);
+    }
+    
     setTimeout(function() {
         if (typeof renderTests === 'function') {
             const testsView = document.getElementById('testsView');
@@ -1205,6 +1249,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.selectTitle = selectTitle;
     window.getAvailableTitles = getAvailableTitles;
     window.renderTitleOptions = renderTitleOptions;
+    window.restoreOwnerTitle = restoreOwnerTitle;
 });
 
 // ============================================================
@@ -1230,85 +1275,4 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ============================================================
-// MAIN.JS - QO'SHIMCHA FUNKSIYALAR (main.js ga qo'shing)
-// ============================================================
-
-// ============================================================
-// OWNER TITLE TIKLASH
-// ============================================================
-async function restoreOwnerTitle() {
-    const user = getCurrentUser();
-    if (!user || !isOwner(user)) {
-        alert('❌ Faqat owner bu amalni bajarishi mumkin!');
-        return;
-    }
-    
-    try {
-        const response = await apiRequest(`/users/${user.id}/title`, {
-            method: 'PUT',
-            body: JSON.stringify({ title: 'title-owner' })
-        });
-        
-        if (!response) return;
-        const updatedUser = await response.json();
-        localStorage.setItem('app_current_user', JSON.stringify(updatedUser));
-        updateUI();
-        alert('👑 Owner title tiklandi!');
-        location.reload();
-    } catch (error) {
-        console.error('Restore owner title error:', error);
-        alert('Xatolik yuz berdi');
-    }
-}
-
-// ============================================================
-// OWNER CHAT FUNKSIYALARI
-// ============================================================
-async function pinGlobalMessage(messageId) {
-    if (!getCurrentUser() || !isOwner(getCurrentUser())) {
-        alert('❌ Faqat owner bu amalni bajarishi mumkin!');
-        return;
-    }
-    
-    try {
-        const response = await apiRequest(`/chat/global/${messageId}/pin`, {
-            method: 'PUT'
-        });
-        if (response) {
-            loadChatMessages();
-            alert('📌 Xabar pinlandi!');
-        }
-    } catch (error) {
-        console.error('Pin message error:', error);
-    }
-}
-
-async function muteUser(userId) {
-    if (!getCurrentUser() || !isOwner(getCurrentUser())) {
-        alert('❌ Faqat owner bu amalni bajarishi mumkin!');
-        return;
-    }
-    
-    try {
-        const response = await apiRequest(`/users/${userId}/mute`, {
-            method: 'PUT'
-        });
-        if (response) {
-            alert('🔇 Foydalanuvchi ovozsizlantirildi!');
-        }
-    } catch (error) {
-        console.error('Mute user error:', error);
-    }
-}
-
-// ============================================================
-// GLOBAL FUNKSIYALARNI EKSPORT QILISH
-// ============================================================
-window.restoreOwnerTitle = restoreOwnerTitle;
-window.pinGlobalMessage = pinGlobalMessage;
-window.muteUser = muteUser;
-window.isOwner = isOwner;
-
-console.log('✅ Main.js extra functions loaded!');
 console.log('✅ Main.js yuklandi!');
