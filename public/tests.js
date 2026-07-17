@@ -1,8 +1,16 @@
 // ============================================================
 // TESTS.JS - 60 ta test (TO'LIQ - BACKENDGA SAQLASH BILAN)
 // ============================================================
-// tests.js boshiga qo'shing:
+
+// ============================================================
+// API CONFIG
+// ============================================================
 const API_URL = window.location.origin + '/api';
+
+function getToken() {
+    return localStorage.getItem('jwt_token');
+}
+
 // ============================================================
 // TESTLAR MA'LUMOTLARI - 60 TA TEST
 // ============================================================
@@ -1194,6 +1202,7 @@ async function saveTestResultToBackend(subject, correct, wrong, unanswered, tota
             return;
         }
         
+        // ✅ API_URL ni ishlatish
         const response = await fetch(API_URL + '/users/test-result', {
             method: 'POST',
             headers: {
