@@ -1,5 +1,5 @@
 // ============================================================
-// TESTS.JS - 60 ta test (TO'LIQ)
+// TESTS.JS - 60 ta test (TO'LIQ - BACKENDGA SAQLASH BILAN)
 // ============================================================
 
 // ============================================================
@@ -552,7 +552,7 @@ function getSubjectName(key) {
 }
 
 // ============================================================
-// TESTNI BOSHLASH - ASOSIY FUNKSIYA
+// TESTNI BOSHLASH
 // ============================================================
 function startSubjectTest(subject) {
     console.log('🚀 Test boshlanmoqda:', subject);
@@ -787,7 +787,7 @@ function prevQuestion(subject) {
 }
 
 // ============================================================
-// TESTNI YAKUNLASH
+// TESTNI YAKUNLASH - ✅ BACKENDGA SAQLASH BILAN
 // ============================================================
 function finishTest(subject) {
     const tests = allTests.filter(t => t.subject === subject);
@@ -812,13 +812,10 @@ function finishTest(subject) {
     const hasError = wrong > 0 || unanswered > 0;
     const passed = !hasError && percentage >= 70;
     
-    // Test natijasini backendga saqlash
+    // ✅ TEST NATIJASINI BACKENDGA SAQLASH
     saveTestResultToBackend(subject, correct, wrong, unanswered, total, passed);
     
-    // Natijani ko'rsatish
     showTestResult(subject, { correct, wrong, unanswered, total, percentage, hasError });
-    
-    // Test sonini yangilash
     updateTestCounts();
 }
 
@@ -1196,7 +1193,7 @@ async function saveTestResultToBackend(subject, correct, wrong, unanswered, tota
             return;
         }
         
-        const response = await fetch('/api/users/test-result', {
+        const response = await fetch(API_URL + '/users/test-result', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1248,21 +1245,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTestCounts();
     console.log('✅ Tests.js yuklandi! Jami testlar:', allTests.length);
     console.log('📊 Yechilgan testlar:', getCompletedTestCount());
-    
-    // Agar testsView ko'rinadigan bo'lsa, testlarni render qilish
-    setTimeout(function() {
-        const testsView = document.getElementById('testsView');
-        if (testsView && testsView.style.display !== 'none') {
-            renderTests();
-            console.log('✅ Tests rendered automatically');
-        }
-        
-        // Agar testsList elementi bo'lsa, testlarni render qilish
-        if (document.getElementById('testsList')) {
-            renderTests();
-            console.log('✅ Tests rendered (testsList found)');
-        }
-    }, 100);
 });
 
 console.log('✅ Tests.js fully loaded!');
