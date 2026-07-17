@@ -1,5 +1,5 @@
 // ============================================================
-// DATABASE.JS - SQLite (RENDERGA MOSLANGAN) - TUZATILGAN
+// DATABASE.JS - SQLite (RENDERGA MOSLANGAN - TO'LIQ)
 // ============================================================
 
 const sqlite3 = require('sqlite3').verbose();
@@ -34,7 +34,8 @@ function initDatabase(dbPath) {
         title TEXT DEFAULT 'title-default',
         registered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         is_owner BOOLEAN DEFAULT 0,
-        is_banned BOOLEAN DEFAULT 0
+        is_banned BOOLEAN DEFAULT 0,
+        is_muted BOOLEAN DEFAULT 0
       )
     `);
 
@@ -48,6 +49,7 @@ function initDatabase(dbPath) {
         avatar TEXT,
         text TEXT NOT NULL,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        pinned BOOLEAN DEFAULT 0,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
@@ -125,6 +127,8 @@ function initDatabase(dbPath) {
         console.error('Error checking users:', err);
         return;
       }
+      
+      // Agar foydalanuvchilar bo'lmasa, admin yaratish
       if (row.count === 0) {
         const ownerPassword = bcrypt.hashSync('admin123', 10);
         db.run(`
@@ -132,7 +136,12 @@ function initDatabase(dbPath) {
           VALUES (?, ?, ?, ?, ?, ?)
         `, ['admin', 'admin@eduversex.com', ownerPassword, 'Administrator', 'title-owner', 1], function(err) {
           if (err) {
-            console.error('Error creating owner:', err);
+            // Xatolikni yutib yuboramiz (chunki admin allaqachon mavjud bo'lishi mumkin)
+            if (err.code === 'SQLITE_CONSTRAINT') {
+              console.log('ℹ️ Owner already exists, skipping creation.');
+            } else {
+              console.error('Error creating owner:', err);
+            }
           } else {
             console.log('👑 Owner created:');
             console.log('   Username: admin');
@@ -140,12 +149,14 @@ function initDatabase(dbPath) {
             console.log('   Password: admin123');
           }
         });
+      } else {
+        console.log(`ℹ️ ${row.count} users already exist, skipping owner creation.`);
       }
     });
   });
 
   // ============================================================
-  // HELPER FUNCTIONS - EKSPORT QILINADI
+  // HELPER FUNCTIONS
   // ============================================================
 
   function runQuery(sql, params = []) {
@@ -176,7 +187,7 @@ function initDatabase(dbPath) {
   }
 
   // ============================================================
-  // RETURN - BU MUHIM!
+  // RETURN
   // ============================================================
   return {
     db,
