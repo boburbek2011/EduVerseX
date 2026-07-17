@@ -5,8 +5,9 @@
 // ============================================================
 // API CONFIG
 // ============================================================
-const API_URL = window.location.origin + '/api';
-
+if (typeof API_URL === 'undefined') {
+    const API_URL = window.location.origin + '/api';
+}
 function getToken() {
     return localStorage.getItem('jwt_token');
 }
