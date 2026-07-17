@@ -1,11 +1,13 @@
 // ============================================================
-// TESTS.JS - 60 ta test (TO'LIQ - BACKENDGA SAQLASH BILAN)
+// TESTS.JS - 60 ta test (TO'LIQ)
 // ============================================================
 
 // ============================================================
 // API CONFIG
 // ============================================================
-const API_URL = window.location.origin + '/api';
+if (typeof API_URL === 'undefined') {
+    var API_URL = window.location.origin + '/api';
+}
 
 function getToken() {
     return localStorage.getItem('jwt_token');
@@ -796,7 +798,7 @@ function prevQuestion(subject) {
 }
 
 // ============================================================
-// TESTNI YAKUNLASH - ✅ BACKENDGA SAQLASH BILAN
+// TESTNI YAKUNLASH
 // ============================================================
 function finishTest(subject) {
     const tests = allTests.filter(t => t.subject === subject);
@@ -821,7 +823,6 @@ function finishTest(subject) {
     const hasError = wrong > 0 || unanswered > 0;
     const passed = !hasError && percentage >= 70;
     
-    // ✅ TEST NATIJASINI BACKENDGA SAQLASH
     saveTestResultToBackend(subject, correct, wrong, unanswered, total, passed);
     
     showTestResult(subject, { correct, wrong, unanswered, total, percentage, hasError });
@@ -973,10 +974,15 @@ function renderTests() {
     console.log('🔄 Testlar yuklanmoqda...');
     
     const list = document.getElementById('testsList');
-    const modalList = document.getElementById('testsModalList');
-
     if (!list) {
-        console.error('❌ testsList elementi topilmadi!');
+        console.warn('⚠️ testsList elementi topilmadi!');
+        return;
+    }
+    
+    // testsView ko'rinadiganligini tekshirish
+    const testsView = document.getElementById('testsView');
+    if (!testsView || testsView.style.display === 'none') {
+        console.warn('⚠️ testsView yashirilgan, testlar render qilinmaydi');
         return;
     }
 
@@ -1103,8 +1109,6 @@ function renderTests() {
     });
 
     list.innerHTML = html;
-    if (modalList) modalList.innerHTML = html;
-    
     updateTestCounts();
     
     console.log('✅ Testlar yuklandi! Jami:', allTests.length);
@@ -1202,7 +1206,6 @@ async function saveTestResultToBackend(subject, correct, wrong, unanswered, tota
             return;
         }
         
-        // ✅ API_URL ni ishlatish
         const response = await fetch(API_URL + '/users/test-result', {
             method: 'POST',
             headers: {
