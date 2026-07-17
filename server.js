@@ -1,5 +1,5 @@
 // ============================================================
-// SERVER.JS - EduVerseX Backend (RENDERGA MOSLANGAN)
+// SERVER.JS - EduVerseX Backend (RENDERGA MOSLANGAN) - TUZATILGAN
 // ============================================================
 
 require('dotenv').config();
@@ -12,6 +12,11 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// ============================================================
+// TRUST PROXY - RENDER UCHUN MUHIM!
+// ============================================================
+app.set('trust proxy', 1);  // ✅ Bu xatolikni tuzatadi
 
 // ============================================================
 // MIDDLEWARE
@@ -30,11 +35,17 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate limiting
+// Rate limiting - TUZATILGAN
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200,
-  message: { error: 'Too many requests, please try again later.' }
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    // Renderda X-Forwarded-For ni to'g'ri ishlatish
+    return req.ip || req.connection.remoteAddress;
+  }
 });
 app.use('/api/', limiter);
 
@@ -59,12 +70,18 @@ console.log(`🌍 Environment: ${isProduction ? 'PRODUCTION (Render)' : 'DEVELOP
 const db = require('./database')(dbPath);
 
 // ============================================================
-// ROUTES
+// ROUTES - database funksiyalarini ulash
 // ============================================================
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const chatRoutes = require('./routes/chat');
 const leaderboardRoutes = require('./routes/leaderboard');
+
+// Database funksiyalarini req ob'ektiga qo'shish
+app.use((req, res, next) => {
+  req.db = db;
+  next();
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -98,7 +115,6 @@ app.post('/api/offline', (req, res) => {
 
 app.get('/api/online', (req, res) => {
   const now = Date.now();
-  // Clean up stale entries (5 minutes)
   for (const [id, data] of onlineUsers) {
     if (now - data.lastSeen > 5 * 60 * 1000) {
       onlineUsers.delete(id);
