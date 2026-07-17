@@ -58,6 +58,26 @@ let selectedTestAnswers = {};
 let testsCompleted = 0;
 
 // ============================================================
+// MISSIYALAR
+// ============================================================
+const missions = [
+    { id: 1, title: "Birinchi qadam", desc: "1 ta formulani sevimlilarga qo'shing", reward: "title-bronze", rewardName: "🥉 Bronze", check: () => favorites.length >= 1 },
+    { id: 2, title: "Kalkulyator ustasi", desc: "Kalkulyatordan 5 marta foydalaning", reward: "title-silver", rewardName: "⭐ Silver", check: () => calcUsageCount >= 5 },
+    { id: 3, title: "Test yechuvchi", desc: "10 ta testni to'g'ri yeching", reward: "title-gold", rewardName: "🥇 Gold", check: () => getCompletedTestCount() >= 10 },
+    { id: 4, title: "Fanlar olimpi", desc: "Barcha fanlardan kamida 1 ta formula ko'ring", reward: "title-diamond", rewardName: "💎 Diamond", check: () => false },
+    { id: 5, title: "Mutaxassis", desc: "50 ta testni to'g'ri yeching", reward: "title-legendary", rewardName: "👑 Legendary", check: () => getCompletedTestCount() >= 50 }
+];
+
+// Mission reward'lar
+const MISSION_TITLES = {
+    1: 'title-bronze',
+    2: 'title-silver', 
+    3: 'title-gold',
+    4: 'title-diamond',
+    5: 'title-legendary'
+};
+
+// ============================================================
 // FOYDALANUVCHI FUNKSIYALARI
 // ============================================================
 
@@ -108,6 +128,187 @@ function getTitleDisplay(title) {
 }
 
 // ============================================================
+// TITLE TANLASH - FAQAT BAJARILGAN MISSIYALAR ASOSIDA
+// ============================================================
+
+// Foydalanuvchi qaysi title'larni tanlashi mumkin?
+function getAvailableTitles() {
+    const user = getCurrentUser();
+    if (!user) return [];
+    
+    // Owner bo'lsa hamma title'ni tanlay oladi
+    if (isOwner(user)) {
+        return [
+            { id: 'title-default', name: '👤 Default' },
+            { id: 'title-bronze', name: '🥉 Bronze' },
+            { id: 'title-silver', name: '🥈 Silver' },
+            { id: 'title-gold', name: '🥇 Gold' },
+            { id: 'title-diamond', name: '💎 Diamond' },
+            { id: 'title-legendary', name: '🌟 Legendary' },
+            { id: 'title-owner', name: '👑 OWNER' }
+        ];
+    }
+    
+    // Oddiy foydalanuvchi - faqat bajarilgan mission title'larini tanlay oladi
+    const available = [{ id: 'title-default', name: '👤 Default' }];
+    
+    // Bajarilgan missiyalarni tekshirish
+    missions.forEach(mission => {
+        if (completedMissions.includes(mission.id) && mission.reward) {
+            available.push({
+                id: mission.reward,
+                name: mission.rewardName || mission.reward
+            });
+        }
+    });
+    
+    return available;
+}
+
+// Title tanlash modalini ochish
+function openTitleSelector() {
+    const user = getCurrentUser();
+    if (!user) {
+        alert('Tizimga kiring!');
+        return;
+    }
+    
+    const available = getAvailableTitles();
+    if (available.length === 1 && available[0].id === 'title-default') {
+        alert('⚠️ Hali hech qanday title ochilmagan! Missiyalarni bajaring.');
+        return;
+    }
+    
+    const modal = document.getElementById('titleSelectorModal');
+    if (!modal) {
+        createTitleSelectorModal();
+        return;
+    }
+    modal.classList.remove('hidden');
+    renderTitleOptions();
+}
+
+// Title selector modal yaratish
+function createTitleSelectorModal() {
+    if (document.getElementById('titleSelectorModal')) return;
+    
+    const modal = document.createElement('div');
+    modal.id = 'titleSelectorModal';
+    modal.className = 'modal hidden';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width:450px;">
+            <button class="close-btn" onclick="closeModal('titleSelectorModal')">✕</button>
+            <h2 style="color:#4a6cf7;">🏷️ Title tanlash</h2>
+            <p style="color:#888;font-size:14px;margin-bottom:16px;">O'zingiz ochgan title'lardan birini tanlang:</p>
+            <div id="titleOptionsList"></div>
+            <button onclick="closeModal('titleSelectorModal')" style="margin-top:16px;width:100%;padding:12px;background:#333;border:none;border-radius:8px;color:#aaa;cursor:pointer;">Yopish</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    renderTitleOptions();
+}
+
+// Title variantlarini ko'rsatish
+function renderTitleOptions() {
+    const container = document.getElementById('titleOptionsList');
+    if (!container) return;
+    
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+        container.innerHTML = '<p style="color:#888;">Tizimga kiring</p>';
+        return;
+    }
+    
+    const available = getAvailableTitles();
+    const currentTitle = currentUser.title || 'title-default';
+    const isOwnerUser = isOwner(currentUser);
+    
+    if (available.length === 1 && available[0].id === 'title-default') {
+        container.innerHTML = `
+            <div style="text-align:center;padding:20px;color:#888;">
+                <p>📭 Hali hech qanday title ochilmagan!</p>
+                <p style="font-size:13px;">Missiyalarni bajarib, title'larni oching.</p>
+                <button onclick="closeModal('titleSelectorModal')" style="margin-top:12px;padding:8px 20px;background:#4a6cf7;border:none;border-radius:6px;color:white;cursor:pointer;">Yopish</button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div style="margin-bottom:12px;color:#888;font-size:13px;">🎯 Siz ochgan title\'lar:</div>';
+    
+    html += available.map(title => {
+        const isActive = currentTitle === title.id;
+        const isDefault = title.id === 'title-default';
+        
+        return `
+            <div onclick="${isActive ? '' : `selectTitle('${title.id}')`}" style="
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                padding:12px 16px;
+                background: ${isActive ? '#1a2a4a' : '#0a0a0a'};
+                border: 2px solid ${isActive ? '#4a6cf7' : '#333'};
+                border-radius:10px;
+                margin-bottom:8px;
+                cursor: ${isActive ? 'default' : 'pointer'};
+                transition:0.3s;
+                opacity: ${isActive ? 1 : 0.8};
+            " ${!isActive ? `onmouseover="this.style.borderColor='#4a6cf7'" onmouseout="this.style.borderColor='#333'"` : ''}>
+                <span style="font-size:16px;">${title.name}</span>
+                ${isActive ? '<span style="color:#4a6cf7;">✅ Tanlangan</span>' : '<span style="color:#888;">Tanlash</span>'}
+            </div>
+        `;
+    }).join('');
+    
+    if (!isOwnerUser) {
+        html += `
+            <div style="margin-top:12px;padding:12px;background:#1a1a1a;border-radius:8px;border:1px solid #333;text-align:center;">
+                <div style="color:#888;font-size:12px;">
+                    💡 Yangi title'lar ochish uchun missiyalarni bajaring!
+                </div>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+// Title tanlash
+async function selectTitle(titleId) {
+    const user = getCurrentUser();
+    if (!user) {
+        alert('Tizimga kiring!');
+        return;
+    }
+    
+    const available = getAvailableTitles();
+    if (!available.find(t => t.id === titleId)) {
+        alert('❌ Bu title sizga ruxsat etilmagan!');
+        return;
+    }
+    
+    try {
+        const response = await apiRequest(`/users/${user.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ title: titleId })
+        });
+        
+        if (!response) return;
+        const updatedUser = await response.json();
+        
+        localStorage.setItem('app_current_user', JSON.stringify(updatedUser));
+        updateUI();
+        renderTitleOptions();
+        
+        showNotification(`✅ Title o'zgartirildi!`, 'success');
+        closeModal('titleSelectorModal');
+    } catch (error) {
+        console.error('Title o\'zgartirish xatosi:', error);
+        alert('Xatolik yuz berdi');
+    }
+}
+
+// ============================================================
 // LOCALSTORAGE YORDAMCHI FUNKSIYALAR
 // ============================================================
 
@@ -137,6 +338,23 @@ function loadState() {
 }
 
 // ============================================================
+// GET COMPLETED TEST COUNT
+// ============================================================
+function getCompletedTestCount() {
+    let completed = 0;
+    if (typeof allTests !== 'undefined') {
+        for (const key in selectedTestAnswers) {
+            const idx = parseInt(key);
+            if (selectedTestAnswers[idx] !== undefined && 
+                selectedTestAnswers[idx] === allTests[idx]?.correct) {
+                completed++;
+            }
+        }
+    }
+    return completed;
+}
+
+// ============================================================
 // UPDATE UI
 // ============================================================
 function updateUI() {
@@ -150,6 +368,7 @@ function updateUI() {
     const loginBtn = document.getElementById('loginBtn');
     const favCount = document.getElementById('favCount');
     const testCount = document.getElementById('testCount');
+    const titleCount = document.getElementById('titleCount');
 
     if (sidebarUsername) sidebarUsername.textContent = currentUser?.username || 'Mehmon';
     if (sidebarEmail) sidebarEmail.textContent = currentUser?.email || 'Tizimga kirmagansiz';
@@ -167,6 +386,11 @@ function updateUI() {
     if (loginBtn) loginBtn.classList.toggle('hide', !!currentUser);
     if (favCount) favCount.textContent = favorites?.length || 0;
     if (testCount) testCount.textContent = getCompletedTestCount();
+    
+    if (titleCount) {
+        const available = getAvailableTitles();
+        titleCount.textContent = available.length - 1;
+    }
 
     // Profile
     const profileUsername = document.getElementById('profileUsername');
@@ -221,20 +445,6 @@ function updateFormulaCounts() {
         if (badge) badge.textContent = `${count} formula`;
         if (countEl) countEl.textContent = count;
     });
-}
-
-function getCompletedTestCount() {
-    let completed = 0;
-    if (typeof allTests !== 'undefined') {
-        for (const key in selectedTestAnswers) {
-            const idx = parseInt(key);
-            if (selectedTestAnswers[idx] !== undefined && 
-                selectedTestAnswers[idx] === allTests[idx]?.correct) {
-                completed++;
-            }
-        }
-    }
-    return completed;
 }
 
 // ============================================================
@@ -521,7 +731,6 @@ function openModal(id) {
         if (id === 'missionsModal') renderMissions();
         if (id === 'profileModal') updateUI();
         if (id === 'testsModal') {
-            // Testlarni ko'rsatish
             showTestsView();
         }
     }
@@ -557,9 +766,6 @@ function showMain() {
     window.scrollTo(0, 0);
 }
 
-// ============================================================
-// TESTS VIEW KO'RSATISH
-// ============================================================
 function showTestsView() {
     const testsView = document.getElementById('testsView');
     const menuGrid = document.getElementById('menuGrid');
@@ -571,18 +777,12 @@ function showTestsView() {
     if (formulasView) formulasView.style.display = 'none';
     if (calculatorView) calculatorView.style.display = 'none';
 
-    // Testlarni render qilish
     if (typeof renderTests === 'function') {
         renderTests();
         console.log('✅ Tests rendered in showTestsView()');
-    } else {
-        console.warn('⚠️ renderTests function not found');
     }
 }
 
-// ============================================================
-// SUBJECT VIEW
-// ============================================================
 function showSubject(subjectKey) {
     currentSubject = subjectKey;
     currentTopic = null;
@@ -597,7 +797,6 @@ function showSubject(subjectKey) {
     if (testsView) testsView.style.display = 'none';
     if (formulasView) formulasView.style.display = 'block';
 
-    // Save viewed subject
     if (getCurrentUser()) {
         apiRequest('/users/viewed-subject', {
             method: 'POST',
@@ -877,14 +1076,6 @@ function removeFavorite(idx) {
 // ============================================================
 // MISSIYALAR
 // ============================================================
-const missions = [
-    { id: 1, title: "Birinchi qadam", desc: "1 ta formulani sevimlilarga qo'shing", reward: "title-bronze", rewardName: "🥉 Bronze", check: () => favorites.length >= 1 },
-    { id: 2, title: "Kalkulyator ustasi", desc: "Kalkulyatordan 5 marta foydalaning", reward: "title-silver", rewardName: "⭐ Silver", check: () => calcUsageCount >= 5 },
-    { id: 3, title: "Test yechuvchi", desc: "10 ta testni to'g'ri yeching", reward: "title-gold", rewardName: "🥇 Gold", check: () => getCompletedTestCount() >= 10 },
-    { id: 4, title: "Fanlar olimpi", desc: "Barcha fanlardan kamida 1 ta formula ko'ring", reward: "title-diamond", rewardName: "💎 Diamond", check: () => false },
-    { id: 5, title: "Mutaxassis", desc: "50 ta testni to'g'ri yeching", reward: "title-legendary", rewardName: "👑 Legendary", check: () => getCompletedTestCount() >= 50 }
-];
-
 function renderMissions() {
     const list = document.getElementById('missionsList');
     if (!list) return;
@@ -996,31 +1187,25 @@ function showRandomFormula() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Fanlar olami yuklandi!');
     
-    // State yuklash
     loadState();
     currentUser = getCurrentUser();
     
-    // UI yangilash
     updateUI();
     updateFormulaCounts();
     
-    // Chat yuklash
     if (document.getElementById('chatMessages')) {
         loadChatMessages();
         setInterval(loadChatMessages, 5000);
     }
     
-    // Private chat yuklash
     if (document.getElementById('privateChatsSection')) {
         loadPrivateChats();
         setInterval(loadPrivateChats, 10000);
     }
     
-    // Online status
     updateOnlineStatus();
     setInterval(updateOnlineStatus, 30000);
     
-    // Login/Logout holati
     if (currentUser) {
         const loginBtn = document.getElementById('loginBtn');
         const logoutBtn = document.getElementById('sidebarLogout');
@@ -1028,10 +1213,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (logoutBtn) logoutBtn.style.display = 'flex';
     }
     
-    // Testlarni yuklash (agar tests.js yuklangan bo'lsa)
     setTimeout(function() {
         if (typeof renderTests === 'function') {
-            // Testlarni faqat testsView ko'rinadigan bo'lsa render qilish
             const testsView = document.getElementById('testsView');
             if (testsView && testsView.style.display !== 'none') {
                 renderTests();
@@ -1041,6 +1224,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('⚠️ renderTests function not found');
         }
     }, 500);
+    
+    // Title selector modal uchun global funksiyalar
+    window.openTitleSelector = openTitleSelector;
+    window.selectTitle = selectTitle;
+    window.getAvailableTitles = getAvailableTitles;
+    window.renderTitleOptions = renderTitleOptions;
 });
 
 // ============================================================
