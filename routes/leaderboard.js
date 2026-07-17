@@ -1,18 +1,29 @@
 // ============================================================
-// ROUTES/LEADERBOARD.JS - Leaderboard
+// ROUTES/LEADERBOARD.JS - (TO'LIQ TUZATILGAN)
 // ============================================================
 
 const express = require('express');
 const router = express.Router();
-const { allQuery } = require('../database');
+const path = require('path');
 const { authenticate } = require('../middleware/auth');
 
 // ============================================================
-// GET LEADERBOARD
+// ✅ Database ulanish - TO'G'RI
+// ============================================================
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+const dbPath = isProduction 
+    ? '/tmp/database.sqlite' 
+    : path.join(__dirname, '..', 'database.sqlite');
+
+const db = require('../database')(dbPath);
+const { getQuery, runQuery, allQuery } = db;
+
+// ============================================================
+// GET LEADERBOARD - ✅ TUZATILGAN
 // ============================================================
 router.get('/', authenticate, async (req, res) => {
   try {
-    // Calculate points: 10 per test + 5 per correct answer
+    // 1. Barcha foydalanuvchilarni olish
     const users = await allQuery(`
       SELECT 
         u.id,
@@ -31,10 +42,23 @@ router.get('/', authenticate, async (req, res) => {
       ORDER BY points DESC, correct_answers DESC
     `);
 
-    res.json(users);
+    // 2. Agar hech qanday foydalanuvchi bo'lmasa
+    if (!users || users.length === 0) {
+      return res.json([]);
+    }
+
+    // 3. Natijalarni formatlash (raqamlarni to'g'ri turga keltirish)
+    const formattedUsers = users.map(user => ({
+      ...user,
+      total_tests: parseInt(user.total_tests) || 0,
+      correct_answers: parseInt(user.correct_answers) || 0,
+      points: parseInt(user.points) || 0
+    }));
+
+    res.json(formattedUsers);
   } catch (error) {
     console.error('Leaderboard error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
@@ -69,10 +93,17 @@ router.get('/filter/:title', authenticate, async (req, res) => {
       ORDER BY points DESC, correct_answers DESC
     `, [title]);
 
-    res.json(users);
+    const formattedUsers = (users || []).map(user => ({
+      ...user,
+      total_tests: parseInt(user.total_tests) || 0,
+      correct_answers: parseInt(user.correct_answers) || 0,
+      points: parseInt(user.points) || 0
+    }));
+
+    res.json(formattedUsers);
   } catch (error) {
     console.error('Leaderboard filter error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
@@ -106,10 +137,17 @@ router.get('/search', authenticate, async (req, res) => {
       ORDER BY points DESC, correct_answers DESC
     `, [`%${search}%`, `%${search}%`, `%${search}%`]);
 
-    res.json(users);
+    const formattedUsers = (users || []).map(user => ({
+      ...user,
+      total_tests: parseInt(user.total_tests) || 0,
+      correct_answers: parseInt(user.correct_answers) || 0,
+      points: parseInt(user.points) || 0
+    }));
+
+    res.json(formattedUsers);
   } catch (error) {
     console.error('Leaderboard search error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
@@ -120,7 +158,6 @@ router.get('/rank/:userId', authenticate, async (req, res) => {
   const userId = parseInt(req.params.userId);
 
   try {
-    // Get all users with points
     const users = await allQuery(`
       SELECT 
         u.id,
@@ -138,12 +175,12 @@ router.get('/rank/:userId', authenticate, async (req, res) => {
     res.json({
       userId,
       rank: rank > 0 ? rank : null,
-      points: userPoints,
+      points: userPoints || 0,
       totalUsers
     });
   } catch (error) {
     console.error('Get rank error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
