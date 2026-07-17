@@ -1,5 +1,5 @@
 // ============================================================
-// SERVER.JS - EduVerseX Backend (TO'LIQ)
+// SERVER.JS - EduVerseX Backend (RENDERGA MOSLANGAN)
 // ============================================================
 
 require('dotenv').config();
@@ -8,6 +8,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,9 +39,24 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // ============================================================
-// DATABASE
+// DATABASE - RENDER UCHUN /tmp/ PAPKASIDA
 // ============================================================
-const db = require('./database');
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+const dbPath = isProduction 
+    ? '/tmp/database.sqlite'  // ✅ Renderda /tmp/ papkasida
+    : path.join(__dirname, 'database.sqlite');  // ✅ Lokalda
+
+// Papka mavjudligini tekshirish
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
+console.log(`💾 Database path: ${dbPath}`);
+console.log(`🌍 Environment: ${isProduction ? 'PRODUCTION (Render)' : 'DEVELOPMENT'}`);
+
+// Database modulini ishga tushirish
+const db = require('./database')(dbPath);
 
 // ============================================================
 // ROUTES
@@ -139,9 +155,11 @@ app.use((err, req, res, next) => {
 // ============================================================
 app.listen(PORT, () => {
   console.log('========================================');
-  console.log('🚀 EduVerseX Server');
+  console.log('🚀 EduVerseX Server (Render Ready)');
   console.log(`📡 Port: ${PORT}`);
   console.log(`🔗 API: http://localhost:${PORT}/api`);
+  console.log(`💾 Database: ${dbPath}`);
+  console.log(`🌍 Environment: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}`);
   console.log('========================================');
 });
 
