@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduVerseX</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Qo'shimcha stillar */
+        .header .nav-links #registerBtn {
+            display: none !important;
+        }
+        .sidebar #sidebarLoginBtn {
+            display: none !important;
+        }
+        .sidebar .menu-item#sidebarLogout {
+            display: none !important;
+        }
+        .sidebar .menu-item#sidebarLogout.show {
+            display: flex !important;
+        }
+        .header .nav-links #loginBtn.hide {
+            display: none !important;
+        }
+
+        /* Test stillari */
+        .test-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .test-card .test-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f0f0f0;
+            margin-bottom: 4px;
+        }
+        .test-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .test-options label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #ccc;
+        }
+        .test-options label:hover {
+            border-color: #4a6cf7;
+            background: #1a1a1a;
+        }
+        .test-options label.selected {
+            border-color: #4a6cf7;
+            background: #1a1a1a;
+        }
+        .test-options label.correct {
+            border-color: #2ecc71;
+            background: #0a2a0a;
+        }
+        .test-options label.wrong {
+            border-color: #e74c3c;
+            background: #2a0a0a;
+        }
+        .test-options input[type="radio"] {
+            accent-color: #4a6cf7;
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        .test-result {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        .test-result.pass {
+            background: #0a2a0a;
+            color: #2ecc71;
+            border: 1px solid #2ecc71;
+        }
+        .test-result.fail {
+            background: #2a0a0a;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+        .btn-submit {
+            padding: 10px 24px;
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-submit:hover {
+            opacity: 0.85;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #252525;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4a6cf7, #2ecc71);
+            transition: width 0.5s;
+            border-radius: 4px;
+        }
+        .no-results {
+            color: #888;
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 16px;
+        }
+        .profile-view-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 6000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .profile-view-modal.active {
+            display: flex;
+        }
+        .profile-view-content {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 450px;
+            width: 90%;
+            border: 1px solid #333;
+            max-height: 85vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+        .profile-view-content .pv-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #4a6cf7;
+            margin-bottom: 12px;
+        }
+        .profile-view-content .pv-avatar-placeholder {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #252525;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin: 0 auto 12px;
+            border: 3px solid #4a6cf7;
+        }
+        .profile-view-content .pv-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: #f0f0f0;
+        }
+        .profile-view-content .pv-id {
+            font-size: 14px;
+            color: #888;
+            margin: 4px 0 12px;
+        }
+        .profile-view-content .pv-info {
+            text-align: left;
+            margin: 16px 0;
+            padding: 16px;
+            background: #0a0a0a;
+            border-radius: 8px;
+        }
+        .profile-view-content .pv-info p {
+            margin: 4px 0;
+            color: #aaa;
+            font-size: 14px;
+        }
+        .profile-view-content .pv-info p strong {
+            color: #f0f0f0;
+        }
+        .owner-commands {
+            background: #0a0a0a;
+            border: 1px solid #4a6cf7;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+            text-align: left;
+        }
+        .owner-commands h4 {
+            color: #4a6cf7;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .owner-commands .cmd-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .owner-commands .cmd-row input {
+            flex: 1;
+            padding: 6px 10px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #f0f0f0;
+            font-size: 13px;
+            outline: none;
+        }
+        .owner-commands .cmd-row input:focus {
+            border-color: #4a6cf7;
+        }
+        .owner-commands .cmd-row button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .sidebar .user-avatar .avatar-placeholder img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .pinned-section {
+            background: #1a1a2a;
+            border: 1px solid #f39c12;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+        }
+        .pinned-title {
+            color: #f39c12;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pinned-msg {
+            background: #252535;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pinned-msg:hover {
+            background: #2a2a4a;
+            border: 1px solid #f39c12;
+        }
+        .pinned-msg .pinned-user {
+            color: #4a6cf7;
+            font-weight: 600;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .pinned-msg .pinned-text {
+            color: #ccc;
+            font-size: 13px;
+            flex: 1;
+        }
+        .pinned-msg .unpin-btn {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 4px;
+        }
+        .title-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .title-tag.title-default {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+        .title-tag.title-bronze {
+            background: linear-gradient(135deg, #cd7f32, #b87333);
+            color: white;
+        }
+        .title-tag.title-silver {
+            background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+            color: white;
+        }
+        .title-tag.title-gold {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+            animation: goldGlow 2s infinite;
+        }
+        .title-tag.title-diamond {
+            background: linear-gradient(135deg, #b9f2ff, #7de3f7);
+            color: #333;
+            box-shadow: 0 0 15px rgba(125, 227, 247, 0.6);
+        }
+        .title-tag.title-legendary {
+            background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff);
+            color: white;
+            box-shadow: 0 0 20px rgba(131, 56, 236, 0.8);
+            animation: legendaryGlow 3s infinite;
+        }
+        .title-tag.title-owner {
+            background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff, #00f5d4, #ff006e);
+            background-size: 300% 300%;
+            color: white;
+            font-weight: 900;
+            font-size: 11px;
+            padding: 3px 12px;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.8);
+            animation: ownerRainbow 3s ease infinite, ownerFloat 4s ease-in-out infinite;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .title-tag.title-owner::before {
+            content: '👑';
+            margin-right: 4px;
+        }
+        .title-tag.title-banned {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            text-decoration: line-through;
+        }
+        @keyframes goldGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+        }
+        @keyframes legendaryGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(131, 56, 236, 0.8); }
+            50% { box-shadow: 0 0 30px rgba(255, 0, 110, 1); }
+        }
+        @keyframes ownerRainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes ownerFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+        }
+        .test-explanation {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #0a0a0a;
+            border-left: 3px solid #4a6cf7;
+            border-radius: 4px;
+            color: #888;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <button onclick="toggleSidebar()" class="menu-btn">☰</button>
+    <h1 onclick="showMain()">🎓 Fanlar Olami</h1>
+    <div class="nav-links">
+        <a href="#" onclick="showMain(); return false;">Asosiy</a>
+        <button onclick="openModal('loginModal')" id="loginBtn">Kirish</button>
+        <button id="registerBtn" style="display:none;">Ro'yxatdan o'tish</button>
+    </div>
+</header>
+
+<aside class="sidebar" id="sidebar">
+    <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
+    <div class="user-avatar" onclick="document.getElementById('avatarInput').click()">
+        <div class="avatar-placeholder" id="sidebarAvatar">👤</div>
+        <button class="upload-btn">📷</button>
+        <input type="file" id="avatarInput" accept="image/*" onchange="handleAvatarUpload(event)">
+    </div>
+    <div class="user-name" id="sidebarUsername">Mehmon</div>
+    <div class="user-email" id="sidebarEmail">Tizimga kirmagansiz</div>
+    <div class="user-id" id="sidebarUserId" style="text-align:center;color:#666;font-size:13px;margin-bottom:16px;"></div>
+    
+    <button class="menu-item" onclick="openModal('profileModal'); toggleSidebar();">
+        <i>👤</i> Mening profilim 
+    </button>
+    <button class="menu-item" onclick="openModal('missionsModal'); toggleSidebar();">
+        <i>🎯</i> Missiyalar
+    </button>
+    <button class="menu-item" onclick="openModal('favoritesModal'); toggleSidebar();">
+        <i>❤️</i> Sevimlilar <span class="badge-count" id="favCount">0</span>
+    </button>
+      <!-- Sidebar ichidagi .menu-divider dan keyin yoki before qo'shing -->
+	<div class="menu-divider"></div>
+	<button class="menu-item" onclick="window.location.href='leaderboard.html'; toggleSidebar();">
+	    <i>🏆</i> Reyting
+	</button>
+	<button class="menu-item" onclick="window.location.href='games.html'; toggleSidebar();">
+	    <i>🎮</i> O'yinlar
+	</button>
+    <button class="menu-item" onclick="openModal('statsModal'); toggleSidebar();">
+        <i>📊</i> Statistika
+    </button>
+    <button class="menu-item" onclick="openModal('testsModal'); toggleSidebar();">
+        <i>📝</i> Testlar <span class="badge-count" id="testCount">0</span>
+    </button>
+    
+    <div class="menu-divider"></div>
+    <button class="menu-item" onclick="openChat(); toggleSidebar();">
+        <i>💬</i> Global chat
+    </button>
+    <div class="private-chats-section" id="privateChatsSection">
+        <h4>💬 Shaxsiy chatlar</h4>
+        <p style="color:#888;text-align:center;padding:12px;font-size:13px;">Tizimga kiring</p>
+    </div>
+    <button class="menu-item" onclick="showRandomFormula(); toggleSidebar();">
+        <i>🎲</i> Tasodifiy formula
+    </button>
+    
+    <div class="menu-divider"></div>
+    <button class="menu-item logout-item" id="sidebarLogout" onclick="logout(); toggleSidebar();" style="display:none;">
+        <i>🚪</i> Chiqish
+    </button>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<main id="mainContent">
+    <!-- Asosiy menu -->
+    <div class="menu-grid" id="menuGrid">
+        <div class="menu-card" onclick="showSubject('physics')">
+            <span class="formula-count" id="count-physics">0</span>
+            <i>⚛️</i>
+            <h3>Fizika</h3>
+            <p>Mexanika, elektr, optika...</p>
+            <span class="badge" id="badge-physics">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('algebra')">
+            <span class="formula-count" id="count-algebra">0</span>
+            <i>📐</i>
+            <h3>Algebra</h3>
+            <p>Tenglamalar, funksiyalar...</p>
+            <span class="badge" id="badge-algebra">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('geometry')">
+            <span class="formula-count" id="count-geometry">0</span>
+            <i>📏</i>
+            <h3>Geometriya</h3>
+            <p>Uchburchak, aylana...</p>
+            <span class="badge" id="badge-geometry">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('chemistry')">
+            <span class="formula-count" id="count-chemistry">0</span>
+            <i>🧪</i>
+            <h3>Kimyo</h3>
+            <p>Organik, neorganik...</p>
+            <span class="badge" id="badge-chemistry">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('informatics')">
+            <span class="formula-count" id="count-informatics">0</span>
+            <i>💻</i>
+            <h3>Informatika</h3>
+            <p>Dasturlash, tarmoqlar...</p>
+            <span class="badge" id="badge-informatics">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('mothertongue')">
+            <span class="formula-count" id="count-mothertongue">0</span>
+            <i>📖</i>
+            <h3>Ona tili</h3>
+            <p>Fonetika, morfologiya...</p>
+            <span class="badge" id="badge-mothertongue">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('english')">
+            <span class="formula-count" id="count-english">0</span>
+            <i>🇬🇧</i>
+            <h3>Ingliz tili</h3>
+            <p>Grammar, tenses...</p>
+            <span class="badge" id="badge-english">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('astronomy')">
+            <span class="formula-count" id="count-astronomy">0</span>
+            <i>🌌</i>
+            <h3>Astronomiya</h3>
+            <p>Sayyoralar, yulduzlar...</p>
+            <span class="badge" id="badge-astronomy">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('biology')">
+            <span class="formula-count" id="count-biology">0</span>
+            <i>🧬</i>
+            <h3>Biologiya</h3>
+            <p>Hujayra, genetika...</p>
+            <span class="badge" id="badge-biology">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('philosophy')">
+            <span class="formula-count" id="count-philosophy">0</span>
+            <i>🧠</i>
+            <h3>Falsafa</h3>
+            <p>Epistemologiya, etika...</p>
+            <span class="badge" id="badge-philosophy">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('history')">
+            <span class="formula-count" id="count-history">0</span>
+            <i>📜</i>
+            <h3>Tarix</h3>
+            <p>Qadimgi, zamonaviy...</p>
+            <span class="badge" id="badge-history">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('economics')">
+            <span class="formula-count" id="count-economics">0</span>
+            <i>💰</i>
+            <h3>Iqtisodiyot</h3>
+            <p>Mikro, makro...</p>
+            <span class="badge" id="badge-economics">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('law')">
+            <span class="formula-count" id="count-law">0</span>
+            <i>⚖️</i>
+            <h3>Huquq</h3>
+            <p>Konstitutsiya, jinoyat...</p>
+            <span class="badge" id="badge-law">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('medicine')">
+            <span class="formula-count" id="count-medicine">0</span>
+            <i>💊</i>
+            <h3>Tibbiyot</h3>
+            <p>Anatomiya, farmakologiya...</p>
+            <span class="badge" id="badge-medicine">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('pedagogy')">
+            <span class="formula-count" id="count-pedagogy">0</span>
+            <i>📚</i>
+            <h3>Pedagogika</h3>
+            <p>Didaktika, tarbiya...</p>
+            <span class="badge" id="badge-pedagogy">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('journalism')">
+            <span class="formula-count" id="count-journalism">0</span>
+            <i>📰</i>
+            <h3>Jurnalistika</h3>
+            <p>Janrlar, etika...</p>
+            <span class="badge" id="badge-journalism">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('ecology')">
+            <span class="formula-count" id="count-ecology">0</span>
+            <i>🌍</i>
+            <h3>Ekologiya</h3>
+            <p>Biosfera, suv...</p>
+            <span class="badge" id="badge-ecology">0 formula</span>
+        </div>
+        <div class="menu-card" onclick="showSubject('architecture')">
+            <span class="formula-count" id="count-architecture">0</span>
+            <i>🏛️</i>
+            <h3>Arxitektura</h3>
+            <p>Uslublar, dizayn...</p>
+            <span class="badge" id="badge-architecture">0 formula</span>
+        </div>
+        <!-- MAIN.HTML ga PSIXOLOGIYA KARTOCHKASINI QO'SHISH UCHUN KOD -->
+<!-- Bu kodni main.html dagi .menu-grid ichiga, boshqa menu-card'lar qatoriga qo'shing -->
+
+        <div class="menu-card" onclick="window.location.href='qora_psixologiya.html'" style="border: 2px solid #4a6cf7; background: linear-gradient(135deg, #1a1a2e, #1a1a1a);">
+            <span class="formula-count" style="background: #6c3a9e;">🧠</span>
+            <i style="font-size: 40px; display: block; margin-bottom: 8px;">🧠</i>
+            <h3 style="color: #b388ff;">Qora Psixologiya</h3>
+            <p style="color: #aaa;">Manipulyatsiya, tahlil, psixologik usullar</p>
+            <span class="badge" style="background: #4a6cf7; color: white;">45+ usul</span>
+       </div>
+        <div class="menu-card formula-calc" onclick="showFormulaCalculator()">
+            <i>🧮</i>
+            <h3>Formula Kalkulyator</h3>
+            <p>Fizika, algebra, geometriya...</p>
+            <span class="badge">Hisoblash</span>
+        </div>
+    </div>
+
+    <!-- Formulalar ko'rinishi -->
+    <div id="formulasView" style="display:none;">
+        <button onclick="showMain()" style="background:#4a6cf7;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;margin-bottom:16px;">← Asosiy menyuga qaytish</button>
+        <div class="filter-section">
+            <select id="subjectFilter" onchange="filterFormulas()"><option value="">Barcha fanlar</option></select>
+            <select id="topicFilter" onchange="filterFormulas()"><option value="">Barcha mavzular</option></select>
+            <input type="text" id="searchInput" placeholder="🔍 Qidirish..." oninput="filterFormulas()">
+        </div>
+        <div class="topic-tabs" id="topicTabs"></div>
+        <div id="formulasList"></div>
+    </div>
+
+    <!-- Kalkulyator ko'rinishi -->
+    <div id="formulaCalculatorView" style="display:none;">
+        <button onclick="showMain()" style="background:#4a6cf7;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;margin-bottom:16px;">← Asosiy menyuga qaytish</button>
+        <h2 style="margin-bottom:20px;color:#4a6cf7;">🧮 Formula Kalkulyator</h2>
+        <div style="background:#1a1a1a;border:2px solid #4a6cf7;border-radius:16px;padding:24px;">
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:8px;color:#888;">Fan tanlang:</label>
+                <select id="calcSubject" onchange="updateCalcFormulas()" style="width:100%;padding:10px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:#f0f0f0;">
+                    <option value="">Fan tanlang...</option>
+                </select>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:8px;color:#888;">Formula tanlang:</label>
+                <select id="calcFormula" onchange="loadFormulaCalc()" style="width:100%;padding:10px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:#f0f0f0;">
+                    <option value="">Formula tanlang...</option>
+                </select>
+            </div>
+            <div id="formulaInfo" style="margin-bottom:16px;padding:16px;background:#0a0a0a;border-radius:8px;display:none;">
+                <div style="font-size:18px;color:#4a6cf7;margin-bottom:8px;" id="calcFormulaName"></div>
+                <div style="font-size:24px;font-family:'Courier New',monospace;background:#1a1a1a;padding:12px;border-radius:6px;margin-bottom:12px;" id="calcFormulaText"></div>
+                <div style="color:#888;font-size:13px;margin-bottom:12px;" id="calcFormulaVars"></div>
+            </div>
+            <div id="calcInputs" style="margin-bottom:16px;"></div>
+            <button onclick="calculateFormulaValue()" style="width:100%;padding:12px;background:linear-gradient(135deg,#4a6cf7,#2ecc71);color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;">Hisoblash</button>
+            <div id="calcResult" style="margin-top:16px;padding:16px;background:#0a0a0a;border-radius:8px;text-align:center;font-size:18px;display:none;"></div>
+        </div>
+    </div>
+
+   <!-- Testlar bo'limi -->
+<div id="testsView" style="display:none;">
+    <button onclick="showMain()" style="background:#4a6cf7;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;margin-bottom:16px;">← Asosiy menyuga qaytish</button>
+    
+    <h2 style="margin-bottom:20px;color:#4a6cf7;">📝 Testlar</h2>
+    
+    <!-- Fanlar bo'yicha test tugmalari -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:20px;">
+        <button onclick="startSubjectTest('physics')" style="padding:12px;background:linear-gradient(135deg,#4a6cf7,#2ecc71);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;">⚛️ Fizika</button>
+        <button onclick="startSubjectTest('algebra')" style="padding:12px;background:linear-gradient(135deg,#f39c12,#e67e22);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;">📐 Algebra</button>
+        <button onclick="startSubjectTest('geometry')" style="padding:12px;background:linear-gradient(135deg,#2ecc71,#1abc9c);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;">📏 Geometriya</button>
+        <button onclick="startSubjectTest('chemistry')" style="padding:12px;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;">🧪 Kimyo</button>
+        <button onclick="startSubjectTest('informatics')" style="padding:12px;background:linear-gradient(135deg,#3498db,#2980b9);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;">💻 Informatika</button>
+        <button onclick="startSubjectTest('biology')" style="padding:12px;background:linear-gradient(135deg,#2ecc71,#27ae60);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;">🧬 Biologiya</button>
+        <button onclick="startSubjectTest('english')" style="padding:12px;background:linear-gradient(135deg,#e74c3c,#c0392b);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;">🇬🇧 Ingliz tili</button>
+        <button onclick="startSubjectTest('astronomy')" style="padding:12px;background:linear-gradient(135deg,#1a1a2e,#16213e);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;">🌌 Astronomiya</button>
+        <button onclick="startSubjectTest('history')" style="padding:12px;background:linear-gradient(135deg,#8B4513,#654321);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;">📜 Tarix</button>
+    </div>
+    
+    <div class="progress-bar"><div class="progress-fill" id="testProgress" style="width:0%"></div></div>
+    <div id="testsList"></div>
+</div>
+</main>
+
+<footer class="footer">
+    <pre style="font-family:monospace;color:#444;font-size:11px;">
+==========================================================================
+        █ 940+ formulalar █ 19 ta fan █ Kalkulyator █
+==========================================================================
+    </pre>
+</footer>
+
+<!-- LOGIN MODAL -->
+<div class="modal hidden" id="loginModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal('loginModal')">✕</button>
+        <h2>🔐 Kirish</h2>
+        <input type="text" id="loginUsername" placeholder="Username">
+        <input type="password" id="loginPassword" placeholder="Parol">
+        <button onclick="login()">Kirish</button>
+        <div style="text-align:center;margin-top:12px;color:#888;">
+            Hisobingiz yo'qmi? <a href="index.html" style="color:#4a6cf7;cursor:pointer;">Ro'yxatdan o'ting</a>
+        </div>
+    </div>
+</div>
+
+<!-- BOSHQA MODALLAR -->
+<div class="modal hidden" id="profileModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal('profileModal')">✕</button>
+        <h2>👤 Mening profilim</h2>
+        <div id="profileInfo">
+            <p><strong>Username:</strong> <span id="profileUsername">-</span></p>
+            <p><strong>🆔 ID:</strong> <span id="profileUserId">-</span></p>
+            <p><strong>Email:</strong> <span id="profileEmail">-</span></p>
+            <p><strong>Ro'yxatdan o'tgan:</strong> <span id="profileRegDate">-</span></p>
+            <p>❤️ <strong>Sevimlilar:</strong> <span id="profileFavCount">0</span></p>
+            <p>📝 <strong>Testlar:</strong> <span id="profileTestCount">0</span></p>
+            <p>🧮 <strong>Kalkulyator:</strong> <span id="profileCalcCount">0</span></p>
+            <p>🏆 <strong>Title:</strong> <span id="profileTitleDisplay"><span class="title-tag title-default">👤 Default</span></span></p>
+        </div>
+        <button onclick="closeModal('profileModal')" style="margin-top:12px;">Yopish</button>
+    </div>
+</div>
+
+<div class="modal hidden" id="missionsModal">
+    <div class="modal-content" style="max-width:600px;">
+        <button class="close-btn" onclick="closeModal('missionsModal')">✕</button>
+        <h2>🎯 Missiyalar</h2>
+        <p style="color:#888;margin-bottom:16px;font-size:14px;">Missiyalarni bajaring va yangi title'larni oching!</p>
+        <div id="missionsList"></div>
+        <button onclick="closeModal('missionsModal')" style="margin-top:12px;">Yopish</button>
+    </div>
+</div>
+
+<div class="modal hidden" id="favoritesModal">
+    <div class="modal-content" style="max-width:600px;">
+        <button class="close-btn" onclick="closeModal('favoritesModal')">✕</button>
+        <h2>❤️ Sevimli formulalar</h2>
+        <div id="favoritesList"></div>
+        <button onclick="closeModal('favoritesModal')" style="margin-top:12px;">Yopish</button>
+    </div>
+</div>
+
+<div class="modal hidden" id="statsModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal('statsModal')">✕</button>
+        <h2>📊 Statistika</h2>
+        <div id="statsInfo">
+            <p>📚 <strong>Jami formulalar:</strong> <span id="statsTotalFormulas">0</span></p>
+            <p>📂 <strong>Fanlar soni:</strong> <span id="statsTotalSubjects">0</span></p>
+            <p>❤️ <strong>Sevimlilar:</strong> <span id="statsFavCount">0</span></p>
+            <p>👤 <strong>Foydalanuvchilar:</strong> <span id="statsUsersCount">0</span></p>
+            <p>📝 <strong>Yechilgan testlar:</strong> <span id="statsTestsCount">0</span></p>
+        </div>
+        <button onclick="closeModal('statsModal')" style="margin-top:12px;">Yopish</button>
+    </div>
+</div>
+
+<div class="modal hidden" id="testsModal">
+    <div class="modal-content" style="max-width:700px;max-height:80vh;overflow-y:auto;">
+        <button class="close-btn" onclick="closeModal('testsModal')">✕</button>
+        <h2>📝 Testlar</h2>
+        <div id="testsModalList"></div>
+        <button onclick="closeModal('testsModal')" style="margin-top:12px;">Yopish</button>
+    </div>
+</div>
+
+<!-- CHAT MODAL -->
+<div class="chat-modal" id="chatModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:3000;justify-content:center;align-items:center;">
+    <div class="chat-box" style="background:#1a1a1a;border-radius:16px;width:90%;max-width:700px;height:85vh;display:flex;flex-direction:column;border:1px solid #333;">
+        <div class="chat-header" style="padding:16px 20px;border-bottom:1px solid #333;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="color:#4a6cf7;">💬 Global chat</h3>
+            <button onclick="closeChat()" style="background:none;border:none;color:#888;font-size:28px;cursor:pointer;">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages" style="flex:1;overflow-y:auto;padding:16px;background:#0a0a0a;"></div>
+        <div class="chat-input-area" style="padding:12px 16px;border-top:1px solid #333;display:flex;gap:10px;flex-shrink:0;">
+            <input type="text" id="chatInput" placeholder="Xabar yozing..." onkeypress="if(event.key==='Enter')sendChat()" style="flex:1;padding:10px 14px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:#f0f0f0;outline:none;">
+            <button onclick="sendChat()" style="padding:10px 16px;background:#4a6cf7;border:none;border-radius:8px;color:white;cursor:pointer;font-size:18px;">📤</button>
+        </div>
+    </div>
+</div>
+
+<!-- JS FAYLLAR -->
+<script src="formula.js"></script>
+<script src="tests.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>

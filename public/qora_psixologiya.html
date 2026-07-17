@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qora Psixologiya · chuqur tahlil</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0b0d10;
+            color: #dee5ef;
+            font-family: Segoe UI, system-ui, -apple-system, sans-serif;
+            padding: 1rem 1rem 3rem;
+            line-height: 1.9;
+        }
+
+        .container { max-width: 920px; margin: 0 auto; }
+
+        .book-header {
+            text-align: center;
+            padding: 2rem 1rem 1.8rem;
+            margin-bottom: 2.5rem;
+            background: radial-gradient(circle at 20% 30%, #141b24, #0b0f14);
+            border-radius: 40px 40px 28px 28px;
+            border: 1px solid #2b3442;
+            box-shadow: 0 20px 32px -12px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 16px;
+            left: 20px;
+            background: #1f2a36;
+            border: 1px solid #3e5065;
+            color: #bfd1e8;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background: #2a3848;
+            border-color: #4a6cf7;
+        }
+
+        .book-header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(145deg, #f0f4fe, #b7c9e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(140, 180, 230, 0.25);
+            margin-bottom: 0.2rem;
+        }
+
+        .book-header .sub {
+            font-size: 1rem;
+            color: #99aec9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem 1.8rem;
+        }
+
+        .badge-tele {
+            background: #1f2a36;
+            padding: 0.3rem 1.5rem;
+            border-radius: 60px;
+            border: 1px solid #3e5065;
+            font-size: 0.8rem;
+            color: #bfd1e8;
+        }
+        .badge-tele i { color: #6f8db0; }
+
+        .header-desc {
+            margin-top: 0.8rem;
+            font-size: 1rem;
+            color: #b2c3da;
+            border-top: 1px solid #26303d;
+            padding-top: 1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .section-card {
+            background: #11181f;
+            border-radius: 24px;
+            padding: 1.6rem 1.8rem;
+            margin-bottom: 1.8rem;
+            border: 1px solid #29313d;
+            box-shadow: 0 10px 18px -8px rgba(0,0,0,0.6);
+            transition: border 0.2s;
+        }
+        .section-card:hover { border-color: #4b5d74; }
+
+        .section-title {
+            font-size: 1.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #e6edf8;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.6rem;
+        }
+
+        .section-title i {
+            font-size: 1.7rem;
+            color: #7a94b2;
+            width: 2.2rem;
+            text-align: center;
+        }
+
+        .section-content {
+            font-size: 1.05rem;
+            color: #cfdbe9;
+        }
+
+        .section-content p {
+            margin: 0.8rem 0;
+        }
+
+        .section-content ul, .section-content ol {
+            margin: 0.6rem 0 0.6rem 1.8rem;
+        }
+        .section-content li { margin: 0.4rem 0; }
+
+        .highlight-box {
+            background: #1b2531;
+            border-left: 5px solid #6c86a3;
+            padding: 0.9rem 1.4rem;
+            border-radius: 14px;
+            margin: 1rem 0;
+        }
+
+        .example-quote {
+            background: #1a222d;
+            padding: 0.7rem 1.4rem;
+            border-radius: 30px;
+            font-style: italic;
+            color: #cbd8ec;
+            border: 1px solid #364252;
+            margin: 0.9rem 0;
+            display: inline-block;
+        }
+        .example-quote i { color: #7892b0; margin-right: 8px; }
+
+        .tag {
+            background: #23303e;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            color: #b7ccdf;
+            border: 1px solid #3d4f62;
+            display: inline-block;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .grid-2col { grid-template-columns: 1fr; gap: 0.2rem; }
+            .section-title { font-size: 1.4rem; }
+            .book-header h1 { font-size: 2.2rem; }
+            .section-card { padding: 1.2rem 1.2rem; }
+            .back-btn { font-size: 12px; padding: 6px 12px; top: 12px; left: 12px; }
+        }
+
+        .footer-note {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #29323f;
+            text-align: center;
+            color: #8fa0b5;
+            font-size: 0.9rem;
+        }
+
+        .footer-note .socials {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin: 0.5rem 0 0.3rem;
+        }
+        .footer-note .socials i {
+            font-size: 1.2rem;
+            color: #7d92ab;
+            transition: 0.2s;
+        }
+        .footer-note .socials i:hover { color: #b8ceea; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="book-header">
+        <a href="main.html" class="back-btn"><i class="fas fa-arrow-left"></i> Asosiy</a>
+        <h1>QORA PSIXOLOGIYA</h1>
+        <div class="sub">
+            <span><i class="fas fa-book-open" style="color:#7d94b2;"></i> qollanma</span>
+            <span class="badge-tele"><i class="fab fa-telegram-plane"></i> @MANIPULYATSIYA_PS</span>
+        </div>
+        <div class="header-desc">
+            <i class="fas fa-quote-left" style="opacity: 0.5; margin-right: 6px;"></i>
+            Hayot tarzingizda ast qotadigan maslahatlar
+        </div>
+    </div>
+
+    <!-- MUNDARIJA -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-list-ul"></i> MUNDARIJA</div>
+        <div class="section-content">
+            <div class="grid-2col">
+                <ul style="list-style: none; padding-left: 0;">
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Suhbat toxtab qolmasligi</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Ishonchni sindirish</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Vaziyatdan chiqish</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Gapni bolishga yol qoymang</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Bosim otkazish</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Savollarga javob bermaslik</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Korinmas tahdid</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Maraz odamlardan himoya</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Bahsda golib</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Tartibni buzish</li>
+                </ul>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Bir soniya kuting</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Yoqmagan joyda qolmang</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Men buni qadrlayman</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Ishonuvchanlik</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Qasos usuli</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Dalil keltirish</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Yolg'on, SMS, kuchli sozlar</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Rad etish, parazit sozlar</li>
+                    <li><i class="fas fa-circle" style="font-size: 0.35rem; color: #5a738e; vertical-align: middle; margin-right: 8px;"></i> Isbot va boshqalar</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-comment-dots"></i> Suhbat toxtab qolmasligi</div>
+        <div class="section-content">
+            <p><span class="tag">TAYYORLIK</span> Uchrashuvga 3-4 ta qiziqarli hikoya bilan boring. Kulgili yoki sirli voqealar sukunatni buzadi va suhbatni jonlantiradi.</p>
+            <div class="example-quote"><i class="fas fa-laugh-squint"></i> Kechirasiz, hozirgina eshitgan ahmoqona gapimga allergiyam borga oxshaydi</div>
+            <p>Rahbar jahl qilayotgan bolsa, tabassum va yaqinroq otirish agressiyani kamaytiradi.</p>
+        </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-people-arrows"></i> Vaziyatdan osonlikcha chiqish</div>
+        <div class="section-content">
+            <p><span class="tag">IBORA</span> Men sizni boshqacha tushunibman — qiyin vaziyatda sherikni tushunib, kechirim soramasdan vaziyatni yumshatish. Bu obroni saqlaydi va nizolarni oldini oladi.</p>
+        </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-microphone-alt"></i> Gapingizni bolishlariga yol qoymang</div>
+        <div class="section-content">
+            <p>Xotirjamlik bilan gapirishni davom ettiring. Toxtatgan odamga: Sizning fikringizni ham bilmoqchiman — bu hurmat va nazoratni korsatadi.</p>
+        </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-weight-hanging"></i> Bosim otkazish</div>
+        <div class="section-content">
+            <p>Suhbatdoshni har bir harakati uchun ayblang: Kipriklaring pir-pirap ketyabdiku, nimadan asabiylashyapsan? yoki Nimaga pastga qarayapsan? Biror narsani yashiryapsanmi?</p>
+            <p>Bu usul raqibni himoyalanishga majbur qiladi va sizga ustunlik beradi.</p>
+        </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-question-circle"></i> Savollarga javob bermaslik</div>
+        <div class="section-content">
+            <p>Bu shaxsiy, Oilaviy masala, Men bu haqda boshqalar bilishini xohlamayman — qisqa va qat'iy javoblar qiziqishni toxtatadi.</p>
+        </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-eye-slash"></i> Korinmas tahdid</div>
+        <div class="section-content">
+            <p>Sirli iboralar: Men shunday narsalarni bilaman, hayolingizga ham kelmagan, Vaqti kelganda bilib olasiz. Bu odamni xavotirga soladi va sizni sirli qilib korsatadi.</p>
+        </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-shield-alt"></i> Maraz odamlardan himoyalanish</div>
+        <div class="section-content">
+            <p>Provokatsiyaga berilmang. Boldimi, shumi? — befarqlik. Nega bu gaplarni menga aytyapsiz? — oylantiruvchi savol.</p>
+            <p>Bu usul raqibni oz sozlarining manosizligini anglashga majbur qiladi.</p>
+        </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-trophy"></i> Har qanday bahsda golib chiqing</div>
+        <div class="section-content">
+            <p><span class="tag">CHUNKI</span> sozini kop ishlating. Bu gapingizga mantiqiy toliqlik beradi va 90% hollarda ishonch uygotadi.</p>
+        </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-random"></i> Tartibni buzing!</div>
+        <div class="section-content">
+            <p>Stressda tartibni buzuvchi savollar: Nutqingiz juda zor, kursga borganmisiz? — tajovuzni kamaytiradi.</p>
+        </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-hourglass-half"></i> Bir soniya kuting!</div>
+        <div class="section-content">
+            <p>Javobdan oldin 1-2 soniya pauza — diqqatli tinglovchi taassuroti va ishonchni oshiradi.</p>
+        </div>
+    </div>
+
+    <!-- 11 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-door-open"></i> Ozingizga yoqmagan joyda qolmang</div>
+        <div class="section-content">
+            <p>Agar muhit yoqmasa, turib ketish — oziga hurmat. Bu oddiy qoidani 10% odam bajaradi.</p>
+        </div>
+    </div>
+
+    <!-- 12 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-thumbs-up"></i> Men buni qadrlayman</div>
+        <div class="section-content">
+            <p>Manipulyatsiya obektining hissasini takidlang: Kelgusida shu ishni siz qilsangiz, juda minnatdor bolardim.</p>
+        </div>
+    </div>
+
+    <!-- 13 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-handshake"></i> Men juda ishonuvchanman</div>
+        <div class="section-content">
+            <p>Yolg'onni aniqlagach, o'zingizni sodda qilib ko'rsatib, raqibning zaifligidan foydalaning.</p>
+        </div>
+    </div>
+
+    <!-- 14 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-skull"></i> Qasosning eng zor usuli</div>
+        <div class="section-content">
+            <p>Odamlar nega siz haqingizda yomon gapirishadi? Men sizni yaxshi odam deb bilaman — bu ibora dushmanlikni to'xtatadi.</p>
+        </div>
+    </div>
+
+    <!-- 15 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-balance-scale"></i> Dalil keltirish qoidasi</div>
+        <div class="section-content">
+            <p>Har bir talabingiz ishonchli dalil bilan asoslanishi kerak. Mantiqiy asos hatto qiyin masalalarni ham yengillashtiradi.</p>
+        </div>
+    </div>
+
+    <!-- 16 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-exclamation-triangle"></i> Yolg'on gapirdingizmi? Oshib ketmasin</div>
+        <div class="section-content">
+            <p>Bo'rttirilgan yolg'on ishonarli emas. Odamlar sizning gaplaringizdan ko'ra oz fantaziyalariga ishonishadi.</p>
+        </div>
+    </div>
+
+    <!-- 17 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-user-friends"></i> Yaqin tanish texnikasi</div>
+        <div class="section-content">
+            <p>Tanish odamning ismini tilga olish ishni tezlashtiradi. Men falonchining ukasi bolaman — yordam olish uchun kuchli vosita.</p>
+        </div>
+    </div>
+
+    <!-- 18 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-check-circle"></i> Menga ishon</div>
+        <div class="section-content">
+            <p>Menga ishon, qasam ichaman kabi iboralar takrorlansa — ehtiyot boling. Samimiy odam ozini isbotlashga urinmaydi.</p>
+        </div>
+    </div>
+
+    <!-- 19 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-history"></i> Bolgan voqea usuli</div>
+        <div class="section-content">
+            <p>Shaxsiy tajriba yoki real voqea statistik ma'lumotlardan kuchliroq. Haqiqiy faktlar bilan gapiring.</p>
+        </div>
+    </div>
+
+    <!-- 20 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-sms"></i> Yozishmalardagi yolg'on</div>
+        <div class="section-content">
+            <ul>
+                <li><strong>Jumlalar juda uzun,</strong> haddan tashqari kop isbot va faktlar.</li>
+                <li><strong>Ozgacha tinish belgilari</strong> va togri yozish — ongsiz uslub ozgarishi.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 21 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-bolt"></i> Kuchli sozlar</div>
+        <div class="section-content">
+            <p>O'lim kabi kuchli hissiy sozlar ishonchni oshiradi. Masalan: Har kuni minglab odamlar yollarda halok boladi.</p>
+        </div>
+    </div>
+
+    <!-- 22 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-times-circle"></i> Bu safar emas</div>
+        <div class="section-content">
+            <p>Rad etish huquqiga egasiz. Manipulyatorning aybdor qilish urinishlariga qarshi turing.</p>
+        </div>
+    </div>
+
+    <!-- 23 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-stop-circle"></i> Jim tur, men gapiryapman!</div>
+        <div class="section-content">
+            <p>Toxtatish usuli — raqibni charchatadi. Kam energiya sarflagan, sovuqqon kishi ustun keladi.</p>
+        </div>
+    </div>
+
+    <!-- 24 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-repeat"></i> Takrorlayvering, oxiriga yetmaguncha</div>
+        <div class="section-content">
+            <p>Men buni qilmayman, Mavzuni yopamiz — bir xil intonatsiya bilan takrorlash manipulyatorga samarasizligini korsatadi.</p>
+        </div>
+    </div>
+
+    <!-- 25 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-user-cog"></i> Og'ir xarakterli odammi?</div>
+        <div class="section-content">
+            <p>Siz mutaxassisiz, menga maslahat bera olasizmi? — obroli mavqega qoyish keskinlikni kamaytiradi.</p>
+        </div>
+    </div>
+
+    <!-- 26 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-question"></i> Men aytganimga ishonchingiz komilmi?</div>
+        <div class="section-content">
+            <p>Men bunaqa demaganman, adashtiryapsiz — chalkash vaziyatlarda oz pozitsiyangizni himoya qiladi.</p>
+        </div>
+    </div>
+
+    <!-- 27 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-exclamation"></i> Adashyapsiz!</div>
+        <div class="section-content">
+            <p>Raqib ikkilansa, bosimni kuchaytiring: Gapingizda mano yoq — 100% ishlaydi.</p>
+        </div>
+    </div>
+
+    <!-- 28 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-angry"></i> Jin ursin!</div>
+        <div class="section-content">
+            <p>Yengil sokishlar ishtiyoq va ishonchni oshiradi, lekin meyorida bolishi kerak.</p>
+        </div>
+    </div>
+
+    <!-- 29 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-undo-alt"></i> Oxiri yoq yolg'on – nima u?</div>
+        <div class="section-content">
+            <p>Yolg'onchini hikoyani takrorlashga majburlang — eslay olmasa, fosh boladi.</p>
+        </div>
+    </div>
+
+    <!-- 30 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-hand-paper"></i> YOQ VA YANA YOQ!</div>
+        <div class="section-content">
+            <p>Bahonalarsiz yoq deyish — manipulyatorga qarshi eng kuchli qurol.</p>
+        </div>
+    </div>
+
+    <!-- 31 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-brain"></i> Yolg'oningizni his qilib koring!</div>
+        <div class="section-content">
+            <p>Yolg'onni avval hayolingizda yashab koring. Bu aldash qobiliyatini oshiradi.</p>
+        </div>
+    </div>
+
+    <!-- 32 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-users"></i> Juda qiyin vaziyat!</div>
+        <div class="section-content">
+            <p>Buncha odamga qarshi oz fikringni aytishga qorqasan odam... — bu ibora olomon bosimini yumshatadi.</p>
+        </div>
+    </div>
+
+    <!-- 33 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-puzzle-piece"></i> Yolg'onni haqiqat bilan aralashtiring</div>
+        <div class="section-content">
+            <p>Haqiqiy faktlar qancha kop bolsa, yolg'onni fosh qilish shuncha qiyin.</p>
+        </div>
+    </div>
+
+    <!-- 34 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-check-double"></i> Ha, ha – uning gapi rost!</div>
+        <div class="section-content">
+            <p>Sherik bilan kelishuv illyuziyasini yaratib, keyin oz fikringizni aytish — manipulyatsiya usuli.</p>
+        </div>
+    </div>
+
+    <!-- 35 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-whisper"></i> Nomiga pichirlab qoyish</div>
+        <div class="section-content">
+            <p>Pichirlash yaqinlik va ishonch uygotadi. Sirli muhit boshqa manipulyatsiyalarga yol ochadi.</p>
+        </div>
+    </div>
+
+    <!-- 36 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-phone-alt"></i> Telefondagi yolg'on</div>
+        <div class="section-content">
+            <p>Ovoz ohangi ozgarishi, bogiq ovoz, gap oxirini yutish — yolg'on belgilari. Nafas qisilishi ham kuzatiladi.</p>
+        </div>
+    </div>
+
+    <!-- 37 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-handshake"></i> Qoshilaman, lekin bilmadim...</div>
+        <div class="section-content">
+            <p>Tashqi rozilik: Balkim..., Oylab korish kerak — manipulyatorni tinchlantiradi va siz erkinligingizni saqlaysiz.</p>
+        </div>
+    </div>
+
+    <!-- 38 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-hand-paper"></i> Rad etishni bilmasangiz, nima qilish kerak?</div>
+        <div class="section-content">
+            <p>Doim iltimos qiladigan odamdan ozingiz ham biror narsa sorang — muvozanat yaratiladi.</p>
+        </div>
+    </div>
+
+    <!-- 39 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-eraser"></i> Parazit sozlardan voz keching</div>
+        <div class="section-content">
+            <p>Hmm, anaqa, haligi kabi sozlar ishonchni pasaytiradi. Nutqingizni oldindan mashq qiling.</p>
+        </div>
+    </div>
+
+    <!-- 40 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-search"></i> Qani dalil? Qani isbot?</div>
+        <div class="section-content">
+            <p>Suhbatdoshingiz keltirgan dalillarni tekshiring. Kopchilik tasdiqlanmagan faktlarni isbot deb aytadi.</p>
+        </div>
+    </div>
+
+    <!-- 41 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-heart"></i> Empatiya va faol tinglash</div>
+        <div class="section-content">
+            <p><span class="tag">ASOS</span> Odamlarni tushunishning eng kuchli usuli — ularni chin dildan tinglash.</p>
+            <div class="highlight-box">
+                <i class="fas fa-lightbulb" style="color: #f0c674;"></i>
+                <strong>Empatiya:</strong> Sizning orningizda bolsam, men ham xuddi shunday his qilgan bolardim.
+            </div>
+        </div>
+    </div>
+
+    <!-- 42 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-handshake"></i> Konfliktlarni boshqarish</div>
+        <div class="section-content">
+            <p><span class="tag">STRATEGIYA</span> Konflikt vaqtida hissiyotlarga berilmaslik muhim.</p>
+            <div class="example-quote"><i class="fas fa-comment"></i> Men sizning fikringizni hurmat qilaman, lekin oz nuqtai nazarimni ham tushuntirib berishimga ruxsat bering.</div>
+        </div>
+    </div>
+
+    <!-- 43 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-user-check"></i> Ishonch uygotish sanati</div>
+        <div class="section-content">
+            <p><span class="tag">SIR</span> Odamlarning ishonchini qozonish uchun ularning ehtiyojlariga e'tibor qarating.</p>
+            <div class="highlight-box">
+                <i class="fas fa-check-circle" style="color: #6fbf8a;"></i>
+                <strong>Ishonch qoidasi:</strong> Odamlar siz ularni tinglaganingiz, tushunganingiz va ularning manfaatlarini himoya qilganingizda sizga ishonadilar.
+            </div>
+        </div>
+    </div>
+
+    <!-- 44 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-people-arrows"></i> Nutq va tana tili</div>
+        <div class="section-content">
+            <p><span class="tag">MUHIM</span> Sozlaringizning 55% tana tilingizga, 38% ovoz ohangingizga va faqat 7% sozlarga bogliq.</p>
+            <ul>
+                <li><strong>Koz aloqasi:</strong> Suhbat davomida koz aloqasini ushlab turish ishonchni oshiradi.</li>
+                <li><strong>Ochiq holat:</strong> Qollaringizni kokrakda chalishtirmang.</li>
+                <li><strong>Bosh qimirlatish:</strong> Suhbatdoshning gaplarini tasdiqlaganda bosh qimirlatish.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 45 -->
+    <div class="section-card">
+        <div class="section-title"><i class="fas fa-shield-virus"></i> Psixologik himoya usullari</div>
+        <div class="section-content">
+            <p><span class="tag">HIMOYA</span> Manipulyatsiyadan himoyalanish uchun oz chegaralaringizni bilishingiz kerak.</p>
+            <ul>
+                <li><strong>Buzilgan plastinka:</strong> Bir xil javobni takrorlash.</li>
+                <li><strong>Sovuq javob:</strong> Hissiyotlarsiz, qisqa va aniq javob berish.</li>
+                <li><strong>Vaqt oraligi:</strong> Javob berishdan oldin vaqt sorang.</li>
+            </ul>
+            <div class="highlight-box">
+                <i class="fas fa-shield" style="color: #6f8fc4;"></i>
+                <strong>Esingizda bolsin:</strong> Siz har doim yoq deyish huquqiga egasiz va buning uchun hech qanday bahona berishingiz shart emas.
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-note">
+        <i class="fas fa-crown" style="opacity:0.4;"></i>
+        <p style="margin: 0.2rem 0;">Qollanma Manipulyatsiya Sanati Telegram kanalidan olindi.</p>
+        <div class="socials">
+            <span><i class="fab fa-telegram"></i> @manipulyatsiya_ps</span>
+        </div>
+        <div style="margin-top: 1rem; font-size: 0.8rem; color: #6f829b;">
+            <i class="fas fa-mask"></i> Eslatma: usullarni yaqinlarga qollamang, faqat oz vaziyatingizga moslab foydalaning.
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+</body>
+</html>

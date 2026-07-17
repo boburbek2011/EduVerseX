@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 O'yinlar - Fanlar Olami</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .games-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .games-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a6cf7;
+        }
+        .games-header h1 {
+            color: #4a6cf7;
+            font-size: 32px;
+        }
+        .back-btn {
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .back-btn:hover {
+            opacity: 0.8;
+            transform: scale(1.02);
+        }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .game-card {
+            background: linear-gradient(145deg, #1a1a1a, #121212);
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: #4a6cf7;
+            box-shadow: 0 15px 50px rgba(74, 108, 247, 0.25);
+        }
+        .game-card .game-icon {
+            font-size: 56px;
+            display: block;
+            margin-bottom: 12px;
+        }
+        .game-card .game-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f0f0f0;
+            margin-bottom: 4px;
+        }
+        .game-card .game-desc {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .game-card .game-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #666;
+        }
+        .game-card .game-stats strong {
+            color: #f0f0f0;
+        }
+        .game-card .play-btn {
+            margin-top: 14px;
+            padding: 8px 24px;
+            background: linear-gradient(135deg, #4a6cf7, #2ecc71);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+        .game-card .play-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+        .game-card .badge-difficulty {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .game-card .badge-difficulty.easy { background: #2ecc71; color: #0a0a0a; }
+        .game-card .badge-difficulty.medium { background: #f39c12; color: #0a0a0a; }
+        .game-card .badge-difficulty.hard { background: #e74c3c; color: white; }
+        
+        .game-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-modal.active {
+            display: flex;
+        }
+        .game-modal-content {
+            background: #1a1a1a;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            border: 1px solid #333;
+            position: relative;
+        }
+        .game-modal-content .close-game {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        .game-modal-content .close-game:hover {
+            color: #e74c3c;
+        }
+        .game-modal-content .game-title-modal {
+            font-size: 28px;
+            color: #4a6cf7;
+            margin-bottom: 4px;
+        }
+        .game-modal-content .game-icon-modal {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .game-modal-content .game-desc-modal {
+            color: #888;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .game-play-area {
+            background: #0a0a0a;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 200px;
+            text-align: center;
+        }
+        .game-play-area .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #f0f0f0;
+            margin-bottom: 16px;
+        }
+        .game-play-area .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .game-play-area .options-grid button {
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #f0f0f0;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .game-play-area .options-grid button:hover {
+            border-color: #4a6cf7;
+            background: #252525;
+        }
+        .game-play-area .options-grid button.correct {
+            border-color: #2ecc71;
+            background: #0a2a0a;
+            color: #2ecc71;
+        }
+        .game-play-area .options-grid button.wrong {
+            border-color: #e74c3c;
+            background: #2a0a0a;
+            color: #e74c3c;
+        }
+        .game-play-area .score-display {
+            font-size: 16px;
+            color: #4a6cf7;
+            margin-bottom: 12px;
+        }
+        .game-play-area .game-result {
+            padding: 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .game-play-area .game-result.win {
+            background: #0a2a0a;
+            color: #2ecc71;
+            border: 1px solid #2ecc71;
+        }
+        .game-play-area .game-result.lose {
+            background: #2a0a0a;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+        .game-play-area .next-btn {
+            margin-top: 16px;
+            padding: 10px 32px;
+            background: #4a6cf7;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .game-play-area .restart-btn {
+            margin-top: 12px;
+            padding: 10px 32px;
+            background: #2ecc71;
+            border: none;
+            border-radius: 8px;
+            color: #0a0a0a;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .game-play-area .hint-text {
+            color: #666;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .stats-row .stat-item {
+            background: #0a0a0a;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stats-row .stat-item .stat-val {
+            font-size: 20px;
+            font-weight: 700;
+            color: #4a6cf7;
+        }
+        .stats-row .stat-item .stat-label {
+            font-size: 10px;
+            color: #666;
+        }
+        .game-category-filter {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .game-category-filter button {
+            padding: 8px 20px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #888;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 13px;
+        }
+        .game-category-filter button:hover {
+            border-color: #4a6cf7;
+            color: #f0f0f0;
+        }
+        .game-category-filter button.active {
+            background: #4a6cf7;
+            border-color: #4a6cf7;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="games-container">
+    <div class="games-header">
+        <h1>🎮 O'yinlar</h1>
+        <button class="back-btn" onclick="window.history.back()">← Orqaga</button>
+    </div>
+
+    <!-- Kategoriya filtri -->
+    <div class="game-category-filter">
+        <button class="active" data-cat="all" onclick="setGameCategory('all')">🎮 Hammasi</button>
+        <button data-cat="quiz" onclick="setGameCategory('quiz')">❓ Viktorina</button>
+        <button data-cat="memory" onclick="setGameCategory('memory')">🧠 Xotira</button>
+        <button data-cat="puzzle" onclick="setGameCategory('puzzle')">🧩 Jumboq</button>
+        <button data-cat="timed" onclick="setGameCategory('timed')">⏱️ Vaqtli</button>
+    </div>
+
+    <!-- O'yinlar grid -->
+    <div class="games-grid" id="gamesGrid">
+        <!-- JavaScript orqali to'ldiriladi -->
+    </div>
+</div>
+
+<!-- O'yin modal -->
+<div class="game-modal" id="gameModal">
+    <div class="game-modal-content">
+        <button class="close-game" onclick="closeGame()">✕</button>
+        <span class="game-icon-modal" id="gameModalIcon">🎮</span>
+        <h2 class="game-title-modal" id="gameModalTitle">O'yin</h2>
+        <p class="game-desc-modal" id="gameModalDesc">O'yin tavsifi</p>
+        <div class="game-play-area" id="gamePlayArea">
+            <!-- O'yin mazmuni JavaScript orqali to'ldiriladi -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // O'yin ma'lumotlari
+    const gamesData = [
+        { 
+            id: 1, 
+            title: 'Fizika viktorinasi', 
+            icon: '⚛️', 
+            category: 'quiz',
+            desc: 'Fizika fanidan 15 ta savol. Qanchalik bilimsiz?',
+            difficulty: 'medium',
+            questions: [
+                { q: 'Nyutonning 1-qonuni qanday nomlanadi?', options: ['Inersiya qonuni', 'Gravitatsiya qonuni', 'Harakat qonuni', 'Energiya qonuni'], correct: 0 },
+                { q: 'Yorug\'lik tezligi qancha?', options: ['3×10⁸ m/s', '2×10⁸ m/s', '4×10⁸ m/s', '1×10⁸ m/s'], correct: 0 },
+                { q: 'Elektr zanjirida kuchlanish birligi?', options: ['Amper', 'Volt', 'Om', 'Vatt'], correct: 1 }
+            ]
+        },
+        { 
+            id: 2, 
+            title: 'Kimyo elementlari', 
+            icon: '🧪', 
+            category: 'quiz',
+            desc: 'Kimyoviy elementlar va ularning xossalari',
+            difficulty: 'hard',
+            questions: [
+                { q: 'Suvning kimyoviy formulasi?', options: ['H₂O', 'CO₂', 'NaCl', 'HCl'], correct: 0 },
+                { q: 'O\'yuvchi natriy formulasi?', options: ['NaOH', 'NaCl', 'Na₂CO₃', 'NaHCO₃'], correct: 0 }
+            ]
+        },
+        { 
+            id: 3, 
+            title: 'Matematika jumboq', 
+            icon: '🧩', 
+            category: 'puzzle',
+            desc: 'Matematik jumboqlar va topishmoqlar',
+            difficulty: 'medium',
+            questions: [
+                { q: '1+1=2, 2+2=4, 4+4=?', options: ['8', '16', '6', '10'], correct: 0 },
+                { q: 'Agar 3 ta olma 2 ta anor bilan birga 5 ta meva bo\'lsa, 6 ta olma necha meva?', options: ['6', '8', '10', '12'], correct: 0 }
+            ]
+        },
+        { 
+            id: 4, 
+            title: 'Xotira o\'yini', 
+            icon: '🧠', 
+            category: 'memory',
+            desc: 'Formulalarni eslab qoling va to\'g\'ri javob bering!',
+            difficulty: 'easy',
+            questions: [
+                { q: 'E = mc² formulasi kimga tegishli?', options: ['Eynshteyn', 'Nyuton', 'Plank', 'Bor'], correct: 0 },
+                { q: 'Pifagor teoremasi qaysi shaklga tegishli?', options: ['To\'g\'ri burchakli uchburchak', 'Doira', 'Kvadrat', 'Trapetsiya'], correct: 0 }
+            ]
+        },
+        { 
+            id: 5, 
+            title: 'Tarix viktorinasi', 
+            icon: '📜', 
+            category: 'quiz',
+            desc: 'Tarixiy shaxslar va voqealar haqida bilimingizni sinab ko\'ring',
+            difficulty: 'medium',
+            questions: [
+                { q: 'Amir Temur qaysi asrda yashagan?', options: ['XIV asr', 'XV asr', 'XIII asr', 'XVI asr'], correct: 0 },
+                { q: 'Buyuk ipak yo\'li qaysi davrda rivojlangan?', options: ['Mil.avv. II asr', 'Mil. I asr', 'Mil. V asr', 'Mil. X asr'], correct: 0 }
+            ]
+        },
+        { 
+            id: 6, 
+            title: 'Inglizcha so\'z o\'yini', 
+            icon: '🇬🇧', 
+            category: 'timed',
+            desc: 'Ingliz tilidagi so\'zlarning tarjimasini toping! Vaqt chegarasida',
+            difficulty: 'easy',
+            questions: [
+                { q: '"Book" so\'zining tarjimasi?', options: ['Kitob', 'Daftar', 'Qalam', 'Stol'], correct: 0 },
+                { q: '"School" so\'zining tarjimasi?', options: ['Maktab', 'Universitet', 'O\'quvchi', 'Dars'], correct: 0 }
+            ]
+        },
+        { 
+            id: 7, 
+            title: 'Astronomiya sirlari', 
+            icon: '🌌', 
+            category: 'quiz',
+            desc: 'Koinot va sayyoralar haqida bilimingizni sinab ko\'ring',
+            difficulty: 'hard',
+            questions: [
+                { q: 'Quyosh sistemasidagi eng katta sayyora?', options: ['Yupiter', 'Saturn', 'Uran', 'Neptun'], correct: 0 },
+                { q: 'Yerdan Oyga masofa qancha?', options: ['384,400 km', '200,000 km', '500,000 km', '100,000 km'], correct: 0 }
+            ]
+        },
+        { 
+            id: 8, 
+            title: 'Biologiya testi', 
+            icon: '🧬', 
+            category: 'quiz',
+            desc: 'Biologiyadan qiziqarli savollar',
+            difficulty: 'medium',
+            questions: [
+                { q: 'Inson tanasidagi eng katta a\'zo?', options: ['Teri', 'Yurak', 'Jigar', 'O\'pka'], correct: 0 },
+                { q: 'DNK ning to\'liq nomi?', options: ['Dezoksiribonuklein kislota', 'Dezoksiribonukleid kislota', 'Ribonuklein kislota', 'Ribonukleid kislota'], correct: 0 }
+            ]
+        }
+    ];
+
+    let currentGame = null;
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let totalQuestions = 0;
+    let gameCategory = 'all';
+
+    function setGameCategory(cat) {
+        gameCategory = cat;
+        document.querySelectorAll('.game-category-filter button').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.cat === cat);
+        });
+        renderGames();
+    }
+
+    function renderGames() {
+        const grid = document.getElementById('gamesGrid');
+        
+        let filtered = gamesData;
+        if (gameCategory !== 'all') {
+            filtered = filtered.filter(g => g.category === gameCategory);
+        }
+        
+        grid.innerHTML = filtered.map(game => {
+            const diffClass = game.difficulty;
+            const diffLabel = { easy: 'Oson', medium: 'O\'rta', hard: 'Qiyin' }[game.difficulty] || 'O\'rta';
+            
+            return `
+                <div class="game-card" onclick="startGame(${game.id})">
+                    <span class="game-icon">${game.icon}</span>
+                    <span class="badge-difficulty ${diffClass}">${diffLabel}</span>
+                    <div class="game-title">${game.title}</div>
+                    <div class="game-desc">${game.desc}</div>
+                    <div class="game-stats">
+                        <span>❓ <strong>${game.questions.length}</strong> savol</span>
+                        <span>🏷️ ${game.category === 'quiz' ? 'Viktorina' : 
+                                game.category === 'memory' ? 'Xotira' : 
+                                game.category === 'puzzle' ? 'Jumboq' : 'Vaqtli'}</span>
+                    </div>
+                    <button class="play-btn" onclick="event.stopPropagation(); startGame(${game.id})">▶️ O\'ynash</button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function startGame(gameId) {
+        const game = gamesData.find(g => g.id === gameId);
+        if (!game) return;
+        
+        currentGame = game;
+        currentQuestionIndex = 0;
+        score = 0;
+        totalQuestions = game.questions.length;
+        
+        document.getElementById('gameModalIcon').textContent = game.icon;
+        document.getElementById('gameModalTitle').textContent = game.title;
+        document.getElementById('gameModalDesc').textContent = game.desc;
+        document.getElementById('gameModal').classList.add('active');
+        
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const area = document.getElementById('gamePlayArea');
+        if (!currentGame) return;
+        
+        if (currentQuestionIndex >= currentGame.questions.length) {
+            // O'yin tugadi
+            const pass = score >= Math.ceil(currentGame.questions.length / 2);
+            area.innerHTML = `
+                <div class="score-display">🎯 ${score}/${currentGame.questions.length} to'g'ri</div>
+                <div class="game-result ${pass ? 'win' : 'lose'}">
+                    ${pass ? '🎉 Tabriklaymiz! Siz yutdingiz!' : '😅 Qaytadan urinib ko\'ring!'}
+                </div>
+                <div style="font-size:14px;color:#888;margin-top:8px;">
+                    ${pass ? 'Siz bu fanni yaxshi bilasiz!' : 'Ko\'proq mashq qiling!'}
+                </div>
+                <button class="restart-btn" onclick="startGame(${currentGame.id})">🔄 Qayta o\'ynash</button>
+                <button class="next-btn" onclick="closeGame()">✕ Yopish</button>
+            `;
+            return;
+        }
+        
+        const q = currentGame.questions[currentQuestionIndex];
+        area.innerHTML = `
+            <div class="score-display">❓ ${currentQuestionIndex + 1}/${currentGame.questions.length} · ⭐ ${score} ball</div>
+            <div class="question-text">${q.q}</div>
+            <div class="options-grid" id="optionsGrid">
+                ${q.options.map((opt, idx) => `
+                    <button onclick="answerQuestion(${idx})">${opt}</button>
+                `).join('')}
+            </div>
+            <div class="hint-text">💡 To'g'ri javobni tanlang</div>
+        `;
+    }
+
+    function answerQuestion(selected) {
+        const q = currentGame.questions[currentQuestionIndex];
+        const buttons = document.querySelectorAll('#optionsGrid button');
+        
+        buttons.forEach((btn, idx) => {
+            btn.disabled = true;
+            if (idx === q.correct) btn.classList.add('correct');
+            if (idx === selected && selected !== q.correct) btn.classList.add('wrong');
+        });
+        
+        if (selected === q.correct) {
+            score++;
+        }
+        
+        // Keyingi savolga o'tish uchun tugma
+        const area = document.getElementById('gamePlayArea');
+        setTimeout(() => {
+            currentQuestionIndex++;
+            showQuestion();
+        }, 1200);
+    }
+
+    function closeGame() {
+        document.getElementById('gameModal').classList.remove('active');
+        currentGame = null;
+        currentQuestionIndex = 0;
+        score = 0;
+    }
+
+    // Boshlang'ich render
+    renderGames();
+
+    // Modalni tashqariga bosib yopish
+    document.getElementById('gameModal').addEventListener('click', function(e) {
+        if (e.target === this) closeGame();
+    });
+</script>
+
+</body>
+</html>

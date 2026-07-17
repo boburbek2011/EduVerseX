@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Reyting - EduVerseX</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        .leaderboard-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a6cf7;
+        }
+        .leaderboard-header h1 {
+            color: #4a6cf7;
+            font-size: 32px;
+        }
+        .back-btn {
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .back-btn:hover {
+            opacity: 0.8;
+            transform: scale(1.02);
+        }
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 16px 20px;
+            text-align: center;
+        }
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #4a6cf7;
+        }
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .leaderboard-list {
+            background: #1a1a1a;
+            border-radius: 16px;
+            border: 1px solid #333;
+            overflow: hidden;
+        }
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            border-bottom: 1px solid #252525;
+            transition: 0.2s;
+        }
+        .leaderboard-item:hover {
+            background: #252525;
+        }
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+        .rank {
+            font-size: 18px;
+            font-weight: 700;
+            width: 50px;
+            color: #666;
+            text-align: center;
+        }
+        .rank.gold { color: #ffd700; }
+        .rank.silver { color: #c0c0c0; }
+        .rank.bronze { color: #cd7f32; }
+        .user-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .user-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #252525;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            border: 2px solid #4a6cf7;
+        }
+        .user-avatar-small img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .user-name-rank {
+            font-weight: 600;
+            color: #f0f0f0;
+        }
+        .user-name-rank small {
+            color: #666;
+            font-size: 12px;
+            font-weight: 400;
+        }
+        .user-title {
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .user-points {
+            font-weight: 700;
+            color: #4a6cf7;
+            font-size: 18px;
+        }
+        .title-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .title-default { background: #95a5a6; color: white; }
+        .title-bronze { background: linear-gradient(135deg, #cd7f32, #b87333); color: white; }
+        .title-silver { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: white; }
+        .title-gold { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #333; }
+        .title-diamond { background: linear-gradient(135deg, #b9f2ff, #7de3f7); color: #333; }
+        .title-legendary { background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff); color: white; }
+        .title-owner { background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff, #00f5d4); color: white; font-weight: 900; }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+        .empty-state i {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 16px;
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-tabs button {
+            padding: 8px 20px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #888;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .filter-tabs button:hover {
+            border-color: #4a6cf7;
+            color: #f0f0f0;
+        }
+        .filter-tabs button.active {
+            background: #4a6cf7;
+            border-color: #4a6cf7;
+            color: white;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 10px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #f0f0f0;
+            outline: none;
+        }
+        .search-box input:focus {
+            border-color: #4a6cf7;
+        }
+        .search-box button {
+            padding: 10px 20px;
+            background: #4a6cf7;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+        .leaderboard-item.current-user {
+            border: 2px solid #4a6cf7;
+            background: #1a1a2e;
+        }
+        .leaderboard-item.current-user .rank::after {
+            content: ' 👈';
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="leaderboard-container">
+    <div class="leaderboard-header">
+        <h1>🏆 Reyting</h1>
+        <button class="back-btn" onclick="window.history.back()">← Orqaga</button>
+    </div>
+
+    <div class="stats-summary">
+        <div class="stat-card">
+            <div class="stat-value" id="totalUsers">0</div>
+            <div class="stat-label">👥 Foydalanuvchilar</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="totalPoints">0</div>
+            <div class="stat-label">⭐ Jami ball</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="totalTests">0</div>
+            <div class="stat-label">📝 Testlar</div>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchUser" placeholder="🔍 Foydalanuvchi qidirish..." oninput="filterLeaderboard()">
+        <button onclick="filterLeaderboard()">Qidirish</button>
+    </div>
+
+    <div class="filter-tabs">
+        <button class="active" data-filter="all" onclick="setFilter('all')">🏆 Hammasi</button>
+        <button data-filter="title-default" onclick="setFilter('title-default')">👤 Default</button>
+        <button data-filter="title-bronze" onclick="setFilter('title-bronze')">🥉 Bronza</button>
+        <button data-filter="title-silver" onclick="setFilter('title-silver')">🥈 Kumush</button>
+        <button data-filter="title-gold" onclick="setFilter('title-gold')">🥇 Oltin</button>
+        <button data-filter="title-diamond" onclick="setFilter('title-diamond')">💎 Olmos</button>
+        <button data-filter="title-legendary" onclick="setFilter('title-legendary')">🌟 Afsonaviy</button>
+    </div>
+
+    <div class="leaderboard-list" id="leaderboardList">
+        <div class="empty-state">
+            <i>📭</i>
+            <p>Hozircha foydalanuvchilar yo'q</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// LEADERBOARD.HTML - TO'LIQ JAVASCRIPT (BACKENDGA ULANGAN)
+// ============================================================
+
+const API_URL = window.location.origin + '/api';
+
+function getToken() {
+    return localStorage.getItem('jwt_token');
+}
+
+function getCurrentUser() {
+    try {
+        const saved = localStorage.getItem('app_current_user');
+        if (!saved) return null;
+        return JSON.parse(saved);
+    } catch {
+        return null;
+    }
+}
+
+function getTitleDisplay(title) {
+    const emojis = {
+        'title-default': '👤 Default',
+        'title-bronze': '🥉 Bronze',
+        'title-silver': '🥈 Silver',
+        'title-gold': '🥇 Gold',
+        'title-diamond': '💎 Diamond',
+        'title-legendary': '🌟 Legendary',
+        'title-owner': '👑 OWNER'
+    };
+    return emojis[title] || '👤 Default';
+}
+
+function getTitleClass(title) {
+    const titles = {
+        'title-default': 'title-default',
+        'title-bronze': 'title-bronze',
+        'title-silver': 'title-silver',
+        'title-gold': 'title-gold',
+        'title-diamond': 'title-diamond',
+        'title-legendary': 'title-legendary',
+        'title-owner': 'title-owner'
+    };
+    return titles[title] || 'title-default';
+}
+
+let currentFilter = 'all';
+let currentSearch = '';
+let leaderboardData = [];
+
+function setFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-tabs button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+    });
+    renderLeaderboard();
+}
+
+function filterLeaderboard() {
+    currentSearch = document.getElementById('searchUser').value.toLowerCase();
+    renderLeaderboard();
+}
+
+async function loadLeaderboard() {
+    try {
+        const token = getToken();
+        if (!token) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        const response = await fetch(API_URL + '/leaderboard', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (response.status === 401) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        leaderboardData = await response.json();
+        renderLeaderboard();
+    } catch (error) {
+        console.error('Load leaderboard error:', error);
+        document.getElementById('leaderboardList').innerHTML = `
+            <div class="empty-state">
+                <i>❌</i>
+                <p>Xatolik yuz berdi</p>
+            </div>
+        `;
+    }
+}
+
+function renderLeaderboard() {
+    const list = document.getElementById('leaderboardList');
+    
+    let filtered = leaderboardData;
+    
+    if (currentFilter !== 'all') {
+        filtered = filtered.filter(u => u.title === currentFilter);
+    }
+    
+    if (currentSearch) {
+        filtered = filtered.filter(u => 
+            u.username.toLowerCase().includes(currentSearch) ||
+            (u.name && u.name.toLowerCase().includes(currentSearch))
+        );
+    }
+    
+    const currentUser = getCurrentUser();
+    
+    // Statistikalar
+    document.getElementById('totalUsers').textContent = leaderboardData.length;
+    document.getElementById('totalPoints').textContent = leaderboardData.reduce((sum, u) => sum + (u.points || 0), 0);
+    document.getElementById('totalTests').textContent = leaderboardData.reduce((sum, u) => sum + (u.total_tests || 0), 0);
+    
+    if (filtered.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <i>🔍</i>
+                <p>Foydalanuvchi topilmadi</p>
+            </div>
+        `;
+        return;
+    }
+    
+    list.innerHTML = filtered.map((user, index) => {
+        const rank = index + 1;
+        let rankClass = '';
+        if (rank === 1) rankClass = 'gold';
+        else if (rank === 2) rankClass = 'silver';
+        else if (rank === 3) rankClass = 'bronze';
+        
+        const isCurrent = currentUser && user.id === currentUser.id;
+        const avatarHtml = user.avatar 
+            ? `<img src="${user.avatar}" alt="${user.username}">` 
+            : `<span>${user.username.charAt(0).toUpperCase()}</span>`;
+        
+        return `
+            <div class="leaderboard-item ${isCurrent ? 'current-user' : ''}">
+                <div class="rank ${rankClass}">#${rank}</div>
+                <div class="user-info">
+                    <div class="user-avatar-small">${avatarHtml}</div>
+                    <div>
+                        <div class="user-name-rank">
+                            ${user.username}
+                            ${user.name ? `<small>(${user.name})</small>` : ''}
+                            <span class="user-title ${getTitleClass(user.title)}">${getTitleDisplay(user.title)}</span>
+                        </div>
+                        <div style="color:#666;font-size:12px;">
+                            📝 ${user.total_tests || 0} test · ✅ ${user.correct_answers || 0} to'g'ri
+                        </div>
+                    </div>
+                </div>
+                <div class="user-points">⭐ ${user.points || 0}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Token mavjudligini tekshirish
+if (!getToken()) {
+    window.location.href = 'index.html';
+}
+
+// Boshlang'ich yuklash
+document.addEventListener('DOMContentLoaded', loadLeaderboard);
+setInterval(loadLeaderboard, 30000);
+</script>
+
+</body>
+</html>
