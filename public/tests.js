@@ -1,5 +1,5 @@
 // ============================================================
-// TESTS.JS - 60 ta test bilan to'liq tizim
+// TESTS.JS - 60 ta test (TO'LIQ)
 // ============================================================
 
 // ============================================================
@@ -27,7 +27,7 @@ const allTests = [
         subject: 'physics', 
         question: 'Potensial energiya formulasi?', 
         options: ['Ep = mgh', 'Ek = mv²/2', 'E = mc²', 'P = Fv'], 
-        correct: 0,
+        correct: 1,
         explanation: 'Potensial energiya: Ep = mgh',
         timeLimit: 30
     },
@@ -43,7 +43,7 @@ const allTests = [
         subject: 'physics', 
         question: 'Ish formulasi?', 
         options: ['A = F·s', 'A = mv²/2', 'A = mgh', 'A = qU'], 
-        correct: 1,
+        correct: 0,
         explanation: 'Ish: A = F·s',
         timeLimit: 30
     },
@@ -51,7 +51,7 @@ const allTests = [
         subject: 'physics', 
         question: 'Elektr kuchlanish formulasi?', 
         options: ['U = IR', 'I = U/R', 'R = U/I', 'P = UI'], 
-        correct: 2,
+        correct: 1,
         explanation: 'Om qonuni: U = IR',
         timeLimit: 30
     },
@@ -59,7 +59,7 @@ const allTests = [
         subject: 'physics', 
         question: 'Elektr qarshilik formulasi?', 
         options: ['R = U/I', 'I = U/R', 'U = IR', 'P = UI'], 
-        correct: 1,
+        correct: 2,
         explanation: 'Qarshilik: R = U/I',
         timeLimit: 30
     },
@@ -75,7 +75,7 @@ const allTests = [
         subject: 'physics', 
         question: 'Tovush tezligi havoda?', 
         options: ['340 m/s', '300 m/s', '400 m/s', '500 m/s'], 
-        correct: 2,
+        correct: 3,
         explanation: 'Tovush tezligi havoda: 340 m/s',
         timeLimit: 30
     },
@@ -83,7 +83,7 @@ const allTests = [
         subject: 'physics', 
         question: 'Elektr quvvati formulasi?', 
         options: ['P = UI', 'P = I²R', 'P = U²/R', 'Hammasi to\'g\'ri'], 
-        correct: 3,
+        correct: 0,
         explanation: 'Elektr quvvati: P = UI = I²R = U²/R',
         timeLimit: 30
     },
@@ -101,7 +101,7 @@ const allTests = [
         subject: 'algebra', 
         question: 'Kvadrat tenglama ildizlari yig\'indisi?', 
         options: ['-b/a', 'b/a', 'c/a', '-c/a'], 
-        correct: 2,
+        correct: 1,
         explanation: 'Ildizlar yig\'indisi: -b/a',
         timeLimit: 30
     },
@@ -109,7 +109,7 @@ const allTests = [
         subject: 'algebra', 
         question: 'Kvadrat tenglama ildizlari ko\'paytmasi?', 
         options: ['c/a', '-c/a', 'b/a', '-b/a'], 
-        correct: 1,
+        correct: 2,
         explanation: 'Ildizlar ko\'paytmasi: c/a',
         timeLimit: 30
     },
@@ -141,7 +141,7 @@ const allTests = [
         subject: 'algebra', 
         question: 'Geometrik progressiya yig\'indisi?', 
         options: ['S = b₁(1-q^n)/(1-q)', 'S = (a₁+aₙ)·n/2', 'S = a₁·q^(n-1)', 'S = a₁ + d'], 
-        correct: 1,
+        correct: 0,
         explanation: 'Geometrik progressiya yig\'indisi: S = b₁(1-q^n)/(1-q)',
         timeLimit: 30
     },
@@ -149,7 +149,7 @@ const allTests = [
         subject: 'algebra', 
         question: 'Funksiya hosilasi y = x²?', 
         options: ["y' = 2x", "y' = x²", "y' = 2", "y' = 0"], 
-        correct: 0,
+        correct: 1,
         explanation: "y = x² hosilasi: y' = 2x",
         timeLimit: 30
     },
@@ -157,7 +157,7 @@ const allTests = [
         subject: 'algebra', 
         question: 'Funksiya hosilasi y = sin(x)?', 
         options: ["y' = cos(x)", "y' = -sin(x)", "y' = sin(x)", "y' = -cos(x)"], 
-        correct: 2,
+        correct: 0,
         explanation: "y = sin(x) hosilasi: y' = cos(x)",
         timeLimit: 30
     },
@@ -165,7 +165,7 @@ const allTests = [
         subject: 'algebra', 
         question: 'Funksiya hosilasi y = e^x?', 
         options: ["y' = e^x", "y' = e", "y' = 1", "y' = 0"], 
-        correct: 1,
+        correct: 2,
         explanation: "y = e^x hosilasi: y' = e^x",
         timeLimit: 30
     },
@@ -183,7 +183,7 @@ const allTests = [
         subject: 'geometry', 
         question: 'Aylana uzunligi?', 
         options: ['L = 2πr', 'L = πr²', 'L = 2πr²', 'L = πr'], 
-        correct: 2,
+        correct: 1,
         explanation: 'Aylana uzunligi: L = 2πr',
         timeLimit: 30
     },
@@ -191,7 +191,7 @@ const allTests = [
         subject: 'geometry', 
         question: 'Aylana yuzi?', 
         options: ['S = πr²', 'S = 2πr', 'S = πd', 'S = 2πr²'], 
-        correct: 1,
+        correct: 0,
         explanation: 'Aylana yuzi: S = πr²',
         timeLimit: 30
     },
@@ -199,7 +199,7 @@ const allTests = [
         subject: 'geometry', 
         question: 'To\'g\'ri to\'rtburchak yuzi?', 
         options: ['S = a·b', 'S = 2(a+b)', 'S = a²', 'S = a·b/2'], 
-        correct: 0,
+        correct: 2,
         explanation: 'To\'g\'ri to\'rtburchak yuzi: S = a·b',
         timeLimit: 30
     },
@@ -207,7 +207,7 @@ const allTests = [
         subject: 'geometry', 
         question: 'Uchburchak yuzi?', 
         options: ['S = a·h/2', 'S = a·b', 'S = a²', 'S = 2a+2b'], 
-        correct: 3,
+        correct: 0,
         explanation: 'Uchburchak yuzi: S = a·h/2',
         timeLimit: 30
     },
@@ -215,7 +215,7 @@ const allTests = [
         subject: 'geometry', 
         question: 'To\'g\'ri burchakli uchburchak gipotenuzasi?', 
         options: ['c = √(a²+b²)', 'c = a+b', 'c = a-b', 'c = √(a²-b²)'], 
-        correct: 0,
+        correct: 3,
         explanation: 'Gipotenuza: c = √(a²+b²)',
         timeLimit: 30
     },
@@ -223,7 +223,7 @@ const allTests = [
         subject: 'geometry', 
         question: 'Kvadrat perimetri?', 
         options: ['P = 4a', 'P = a²', 'P = 2a', 'P = a³'], 
-        correct: 2,
+        correct: 0,
         explanation: 'Kvadrat perimetri: P = 4a',
         timeLimit: 30
     },
@@ -239,7 +239,7 @@ const allTests = [
         subject: 'geometry', 
         question: 'Doira diametri?', 
         options: ['d = 2r', 'd = r/2', 'd = πr', 'd = 2πr'], 
-        correct: 0,
+        correct: 2,
         explanation: 'Doira diametri: d = 2r',
         timeLimit: 30
     },
@@ -247,7 +247,7 @@ const allTests = [
         subject: 'geometry', 
         question: 'Parallel to\'g\'ri chiziqlar?', 
         options: ['Bir-birini kesmaydi', 'Bir nuqtada kesishadi', 'Cheksiz nuqtada kesishadi', 'Perpendikulyar'], 
-        correct: 2,
+        correct: 0,
         explanation: 'Parallel to\'g\'ri chiziqlar bir-birini kesmaydi',
         timeLimit: 30
     },
@@ -265,7 +265,7 @@ const allTests = [
         subject: 'chemistry', 
         question: 'Avogadro soni?', 
         options: ['6.02×10²³', '6.02×10²⁴', '6.02×10²²', '6.02×10²⁵'], 
-        correct: 1,
+        correct: 2,
         explanation: 'Avogadro soni: 6.02×10²³',
         timeLimit: 30
     },
@@ -273,7 +273,7 @@ const allTests = [
         subject: 'chemistry', 
         question: 'Modda miqdori formulasi?', 
         options: ['n = m/M', 'n = M/m', 'n = m·M', 'n = V/Vₘ'], 
-        correct: 2,
+        correct: 1,
         explanation: 'Modda miqdori: n = m/M',
         timeLimit: 30
     },
@@ -315,7 +315,7 @@ const allTests = [
         subject: 'informatics', 
         question: 'HTML to\'liq nomi?', 
         options: ['HyperText Markup Language', 'HighText Markup Language', 'HyperText Multi Language', 'HighText Multi Language'], 
-        correct: 0,
+        correct: 1,
         explanation: 'HTML = HyperText Markup Language',
         timeLimit: 30
     },
@@ -323,7 +323,7 @@ const allTests = [
         subject: 'informatics', 
         question: 'CSS to\'liq nomi?', 
         options: ['Cascading Style Sheets', 'Creative Style Sheets', 'Computer Style Sheets', 'Cascading System Sheets'], 
-        correct: 1,
+        correct: 3,
         explanation: 'CSS = Cascading Style Sheets',
         timeLimit: 30
     },
@@ -357,7 +357,7 @@ const allTests = [
         subject: 'biology', 
         question: 'Odamda nechta xromosoma bor?', 
         options: ['46', '48', '44', '50'], 
-        correct: 0,
+        correct: 1,
         explanation: 'Odamda 46 ta xromosoma bor',
         timeLimit: 30
     },
@@ -365,7 +365,7 @@ const allTests = [
         subject: 'biology', 
         question: 'Yurak necha kamerali?', 
         options: ['4 kamerali', '2 kamerali', '3 kamerali', '5 kamerali'], 
-        correct: 1,
+        correct: 3,
         explanation: 'Yurak 4 kamerali',
         timeLimit: 30
     },
@@ -391,7 +391,7 @@ const allTests = [
         subject: 'english', 
         question: 'Past Simple qanday yasaladi?', 
         options: ['Subject + V2', 'Subject + V1(s/es)', 'Subject + am/is/are + Ving', 'Subject + have/has + V3'], 
-        correct: 3,
+        correct: 2,
         explanation: 'Past Simple: Subject + V2',
         timeLimit: 30
     },
@@ -407,7 +407,7 @@ const allTests = [
         subject: 'english', 
         question: 'Qaysi so\'z "olma" degani?', 
         options: ['Apple', 'Orange', 'Banana', 'Grape'], 
-        correct: 0,
+        correct: 3,
         explanation: 'Olma - Apple',
         timeLimit: 30
     },
@@ -415,7 +415,7 @@ const allTests = [
         subject: 'english', 
         question: 'Qaysi so\'z "kitob" degani?', 
         options: ['Book', 'Pen', 'Table', 'Chair'], 
-        correct: 2,
+        correct: 0,
         explanation: 'Kitob - Book',
         timeLimit: 30
     },
@@ -449,7 +449,7 @@ const allTests = [
         subject: 'astronomy', 
         question: 'Oy Yer atrofida necha kunda aylanadi?', 
         options: ['27.3 kun', '30 kun', '365 kun', '24 soat'], 
-        correct: 0,
+        correct: 3,
         explanation: 'Oy Yer atrofida 27.3 kunda aylanadi',
         timeLimit: 30
     },
@@ -457,7 +457,7 @@ const allTests = [
         subject: 'astronomy', 
         question: 'Eng yorqin yulduz?', 
         options: ['Sirius', 'Quyosh', 'Vega', 'Polaris'], 
-        correct: 3,
+        correct: 0,
         explanation: 'Eng yorqin yulduz: Sirius',
         timeLimit: 30
     },
@@ -491,7 +491,7 @@ const allTests = [
         subject: 'history', 
         question: 'Amir Temur qachon yashagan?', 
         options: ['1336-1405', '1200-1300', '1400-1500', '1300-1400'], 
-        correct: 0,
+        correct: 3,
         explanation: 'Amir Temur: 1336-1405',
         timeLimit: 30
     },
@@ -511,6 +511,8 @@ const allTests = [
 window.selectedTestAnswers = {};
 window.testsCompleted = 0;
 window.testContainer = null;
+window._currentTestIndex = 0;
+window._testTimer = null;
 
 // ============================================================
 // TESTLAR SONINI HISOBLASH
@@ -555,20 +557,17 @@ function getSubjectName(key) {
 function startSubjectTest(subject) {
     console.log('🚀 Test boshlanmoqda:', subject);
     
-    // Eski test konteynerini o'chirish
     if (window.testContainer) {
         window.testContainer.remove();
         window.testContainer = null;
     }
     
-    // Fan testlarini olish
     const tests = allTests.filter(t => t.subject === subject);
     if (tests.length === 0) {
         showNotification('⚠️ Bu fan uchun testlar mavjud emas!', 'error');
         return;
     }
     
-    // Test konteynerini yaratish
     const container = document.createElement('div');
     container.id = 'testContainer';
     container.style.cssText = `
@@ -589,7 +588,6 @@ function startSubjectTest(subject) {
         animation: slideIn 0.3s ease;
     `;
     
-    // Yopish tugmasi
     const closeBtn = document.createElement('button');
     closeBtn.textContent = '✕';
     closeBtn.style.cssText = `
@@ -618,7 +616,6 @@ function startSubjectTest(subject) {
     };
     container.appendChild(closeBtn);
     
-    // Test mazmuni
     const content = document.createElement('div');
     content.id = 'testContent';
     container.appendChild(content);
@@ -626,7 +623,7 @@ function startSubjectTest(subject) {
     document.body.appendChild(container);
     window.testContainer = container;
     
-    // Birinchi savolni ko'rsatish
+    window._currentTestIndex = 0;
     showTestQuestion(subject, 0);
 }
 
@@ -647,8 +644,6 @@ function showTestQuestion(subject, index) {
     
     const totalTests = tests.length;
     const progress = ((index + 1) / totalTests * 100).toFixed(0);
-    
-    // Javobni tekshirish
     const selectedAnswer = window.selectedTestAnswers[allTests.indexOf(test)];
     
     container.innerHTML = `
@@ -721,7 +716,6 @@ function showTestQuestion(subject, index) {
         </div>
     `;
     
-    // Timer
     startTimer(subject, index);
 }
 
@@ -729,7 +723,6 @@ function showTestQuestion(subject, index) {
 // JAVOB TANLASH
 // ============================================================
 function selectTestAnswer(testIdx, optionIdx) {
-    // Avvalgi tanlovni tozalash
     const prevAnswer = window.selectedTestAnswers[testIdx];
     if (prevAnswer !== undefined && prevAnswer !== null) {
         const prevEl = document.getElementById(`test_opt_${prevAnswer}`);
@@ -745,7 +738,6 @@ function selectTestAnswer(testIdx, optionIdx) {
         radio.checked = true;
     }
     
-    // Barcha variantlardan ranglarni olib tashlash
     document.querySelectorAll('#testOptions label').forEach(el => {
         el.classList.remove('selected');
     });
@@ -765,12 +757,10 @@ function selectTestAnswer(testIdx, optionIdx) {
 // ============================================================
 function nextQuestion(subject) {
     const tests = allTests.filter(t => t.subject === subject);
-    const currentIndex = tests.findIndex(t => t === tests[window._currentTestIndex || 0]);
     const actualIndex = window._currentTestIndex || 0;
-    
-    // Javob berilganmi tekshirish
     const test = tests[actualIndex];
     const testIdx = allTests.indexOf(test);
+    
     if (window.selectedTestAnswers[testIdx] === undefined) {
         showNotification('⚠️ Iltimos, avval javobni tanlang!', 'error');
         return;
@@ -820,6 +810,10 @@ function finishTest(subject) {
     const total = tests.length;
     const percentage = Math.round((correct / total) * 100);
     const hasError = wrong > 0 || unanswered > 0;
+    const passed = !hasError && percentage >= 70;
+    
+    // Test natijasini backendga saqlash
+    saveTestResultToBackend(subject, correct, wrong, unanswered, total, passed);
     
     // Natijani ko'rsatish
     showTestResult(subject, { correct, wrong, unanswered, total, percentage, hasError });
@@ -954,7 +948,6 @@ function startTimer(subject, index) {
         if (timeLeft <= 0) {
             clearInterval(window._testTimer);
             showNotification('⏰ Vaqt tugadi!', 'error');
-            // Keyingi savolga o'tish
             const currentIndex = window._currentTestIndex || 0;
             const nextIndex = currentIndex + 1;
             if (nextIndex < tests.length) {
@@ -981,7 +974,6 @@ function renderTests() {
         return;
     }
 
-    // Testlarni fanlar bo'yicha guruhlash
     const subjects = {};
     allTests.forEach(test => {
         if (!subjects[test.subject]) {
@@ -1016,7 +1008,6 @@ function renderTests() {
         </div>
     `;
 
-    // Fanlar bo'yicha testlar
     const subjectNames = {
         physics: '⚛️ Fizika',
         algebra: '📐 Algebra',
@@ -1108,7 +1099,6 @@ function renderTests() {
     list.innerHTML = html;
     if (modalList) modalList.innerHTML = html;
     
-    // Sidebarni yangilash
     updateTestCounts();
     
     console.log('✅ Testlar yuklandi! Jami:', allTests.length);
@@ -1196,7 +1186,44 @@ function loadTestState() {
 }
 
 // ============================================================
-// GLOBAL FUNKSIYALARNI EKSPORT QILISH - MUHIM!
+// TEST NATIJASINI BACKENDGA SAQLASH
+// ============================================================
+async function saveTestResultToBackend(subject, correct, wrong, unanswered, total, passed) {
+    try {
+        const token = localStorage.getItem('jwt_token');
+        if (!token) {
+            console.warn('⚠️ No token, test result not saved');
+            return;
+        }
+        
+        const response = await fetch('/api/users/test-result', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                subject,
+                correct,
+                wrong,
+                unanswered,
+                total,
+                passed: passed ? 1 : 0
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ Test result saved to backend');
+        } else {
+            console.error('❌ Failed to save test result:', response.status);
+        }
+    } catch (error) {
+        console.error('❌ Save test result error:', error);
+    }
+}
+
+// ============================================================
+// GLOBAL FUNKSIYALARNI EKSPORT QILISH
 // ============================================================
 window.startSubjectTest = startSubjectTest;
 window.renderTests = renderTests;
@@ -1211,47 +1238,31 @@ window.getTotalTestCount = getTotalTestCount;
 window.getCompletedTestCount = getCompletedTestCount;
 window.loadTestState = loadTestState;
 window.showNotification = showNotification;
+window.saveTestResultToBackend = saveTestResultToBackend;
 
 // ============================================================
 // DOM YUKLANGANDA
 // ============================================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     loadTestState();
     updateTestCounts();
     console.log('✅ Tests.js yuklandi! Jami testlar:', allTests.length);
     console.log('📊 Yechilgan testlar:', getCompletedTestCount());
+    
+    // Agar testsView ko'rinadigan bo'lsa, testlarni render qilish
+    setTimeout(function() {
+        const testsView = document.getElementById('testsView');
+        if (testsView && testsView.style.display !== 'none') {
+            renderTests();
+            console.log('✅ Tests rendered automatically');
+        }
+        
+        // Agar testsList elementi bo'lsa, testlarni render qilish
+        if (document.getElementById('testsList')) {
+            renderTests();
+            console.log('✅ Tests rendered (testsList found)');
+        }
+    }, 100);
 });
 
-// tests.js oxiriga qo'shing
-// ============================================================
-// TEST NATIJASINI BACKENDGA SAQLASH
-// ============================================================
-
-async function saveTestResultToBackend(subject, correct, wrong, unanswered, total, passed) {
-    try {
-        const token = localStorage.getItem('jwt_token');
-        if (!token) return;
-        
-        const response = await fetch('/api/users/test-result', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({
-                subject,
-                correct,
-                wrong,
-                unanswered,
-                total,
-                passed
-            })
-        });
-        
-        if (!response.ok) {
-            console.error('Failed to save test result');
-        }
-    } catch (error) {
-        console.error('Save test result error:', error);
-    }
-}
+console.log('✅ Tests.js fully loaded!');
