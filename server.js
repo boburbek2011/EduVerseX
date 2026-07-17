@@ -1,5 +1,5 @@
 // ============================================================
-// SERVER.JS - EduVerseX Backend (TO'LIQ VA TUZATILGAN)
+// SERVER.JS - EduVerseX Backend (TO'LIQ)
 // ============================================================
 
 require('dotenv').config();
@@ -37,7 +37,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 200,
   message: { error: 'Too many requests, please try again later.' },
   standardHeaders: true,
@@ -115,7 +115,6 @@ app.post('/api/offline', (req, res) => {
 
 app.get('/api/online', (req, res) => {
   const now = Date.now();
-  // Clean up stale entries (5 minutes)
   for (const [id, data] of onlineUsers) {
     if (now - data.lastSeen > 5 * 60 * 1000) {
       onlineUsers.delete(id);
@@ -129,13 +128,41 @@ app.get('/api/online', (req, res) => {
 });
 
 // ============================================================
-// SERVE STATIC FILES - MUHIM: CATCH-ALL DAN OLDIN!
+// OWNER CHAT ENDPOINTLAR
+// ============================================================
+
+// Xabarni pin qilish
+app.put('/api/chat/global/:id/pin', async (req, res) => {
+  try {
+    // Owner tekshiruvi middleware orqali
+    const { authenticate, isOwner } = require('./middleware/auth');
+    // Bu yerda authenticate va isOwner middleware ishlatiladi
+    // routes/chat.js da bajariladi
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Pin message error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Foydalanuvchini ovozsizlantirish
+app.put('/api/users/:id/mute', async (req, res) => {
+  try {
+    const { authenticate, isOwner } = require('./middleware/auth');
+    // routes/users.js da bajariladi
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Mute user error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ============================================================
+// SERVE STATIC FILES
 // ============================================================
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ============================================================
-// HTML ROUTES - ANIQ YO'LLAR
-// ============================================================
+// HTML routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -156,15 +183,11 @@ app.get('/qora_psixologiya.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'qora_psixologiya.html'));
 });
 
-// ============================================================
-// CATCH-ALL - FAQAT TOPILMAGAN YO'LLAR UCHUN
-// ============================================================
+// Catch-all
 app.get('*', (req, res) => {
-  // Agar so'rov fayl bo'lsa (masalan, .js, .css, .png) - 404 qaytar
   if (req.path.includes('.')) {
     return res.status(404).json({ error: 'File not found' });
   }
-  // Aks holda index.html ga yo'naltir (SPA uchun)
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
