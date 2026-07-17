@@ -1,11 +1,19 @@
 // ============================================================
-// MIDDLEWARE/AUTH.JS - JWT Authentication
+// MIDDLEWARE/AUTH.JS - JWT Authentication (TUZATILGAN)
 // ============================================================
 
 const jwt = require('jsonwebtoken');
-const { getQuery } = require('../database');
+const path = require('path');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'eduversex_super_secret_key_2024';
+// Database funksiyalarini to'g'ri import qilish
+const dbPath = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true'
+    ? '/tmp/database.sqlite'
+    : path.join(__dirname, '..', 'database.sqlite');
+
+const db = require('../database')(dbPath);
+const { getQuery } = db;
+
+const JWT_SECRET = process.env.JWT_SECRET || 'eduversex_super_secret_key_2024_secure';
 
 function generateToken(user) {
   return jwt.sign(
@@ -13,7 +21,7 @@ function generateToken(user) {
       id: user.id, 
       username: user.username, 
       email: user.email,
-      is_owner: user.is_owner === 1
+      is_owner: user.is_owner === 1 || user.is_owner === true
     },
     JWT_SECRET,
     { expiresIn: '7d' }
@@ -37,27 +45,37 @@ async function authenticate(req, res, next) {
   const token = authHeader.substring(7);
   const decoded = verifyToken(token);
   if (!decoded) {
-    return res.status(401).json({ error: 'Invalid token' });
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 
-  // Get fresh user data
-  const user = await getQuery('SELECT * FROM users WHERE id = ?', [decoded.id]);
-  if (!user) {
-    return res.status(401).json({ error: 'User not found' });
+  try {
+    // ✅ getQuery endi ishlaydi
+    const user = await getQuery('SELECT * FROM users WHERE id = ?', [decoded.id]);
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    if (user.is_banned === 1) {
+      return res.status(403).json({ error: 'User is banned' });
+    }
+
+    req.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+      avatar: user.avatar,
+      title: user.title,
+      is_owner: user.is_owner === 1,
+      is_banned: user.is_banned === 1,
+      registered_at: user.registered_at
+    };
+
+    next();
+  } catch (error) {
+    console.error('Auth error:', error);
+    res.status(500).json({ error: 'Server error' });
   }
-
-  req.user = {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    name: user.name,
-    avatar: user.avatar,
-    title: user.title,
-    is_owner: user.is_owner === 1,
-    is_banned: user.is_banned === 1
-  };
-
-  next();
 }
 
 function isOwner(req, res, next) {
@@ -71,5 +89,6 @@ module.exports = {
   generateToken,
   verifyToken,
   authenticate,
-  isOwner
+  isOwner,
+  JWT_SECRET
 };
