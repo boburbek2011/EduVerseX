@@ -1,5 +1,5 @@
 // ============================================================
-// MAIN.JS - Asosiy ilova logikasi (BACKENDGA ULANGAN)
+// MAIN.JS - Asosiy ilova logikasi (TO'LIQ)
 // ============================================================
 
 // ============================================================
@@ -54,9 +54,6 @@ let currentSubject = null;
 let currentTopic = null;
 let completedMissions = [];
 let currentCalcFormula = null;
-let privateChats = {};
-let pinnedMessages = [];
-let chatReactions = {};
 let selectedTestAnswers = {};
 let testsCompleted = 0;
 
@@ -111,7 +108,7 @@ function getTitleDisplay(title) {
 }
 
 // ============================================================
-// LOCALSTORAGE YORDAMCHI FUNKSIYALAR (FAQAT FRONTEND UCHUN)
+// LOCALSTORAGE YORDAMCHI FUNKSIYALAR
 // ============================================================
 
 function saveState() {
@@ -444,10 +441,9 @@ let currentPrivateChatUserId = null;
 
 async function openPrivateChat(userId, username) {
     currentPrivateChatUserId = userId;
-    // Private chat oynasini ochish
     const modal = document.getElementById('privateChatModal');
     if (modal) {
-        modal.classList.add('active');
+        modal.style.display = 'flex';
         document.getElementById('privateChatTitle').textContent = '💬 ' + username;
     }
     await loadPrivateMessages(userId);
@@ -510,7 +506,7 @@ async function sendPrivateMessage() {
 
 function closePrivateChat() {
     const modal = document.getElementById('privateChatModal');
-    if (modal) modal.classList.remove('active');
+    if (modal) modal.style.display = 'none';
     currentPrivateChatUserId = null;
 }
 
@@ -524,6 +520,10 @@ function openModal(id) {
         if (id === 'favoritesModal') renderFavorites();
         if (id === 'missionsModal') renderMissions();
         if (id === 'profileModal') updateUI();
+        if (id === 'testsModal') {
+            // Testlarni ko'rsatish
+            showTestsView();
+        }
     }
 }
 
@@ -557,6 +557,32 @@ function showMain() {
     window.scrollTo(0, 0);
 }
 
+// ============================================================
+// TESTS VIEW KO'RSATISH
+// ============================================================
+function showTestsView() {
+    const testsView = document.getElementById('testsView');
+    const menuGrid = document.getElementById('menuGrid');
+    const formulasView = document.getElementById('formulasView');
+    const calculatorView = document.getElementById('formulaCalculatorView');
+
+    if (testsView) testsView.style.display = 'block';
+    if (menuGrid) menuGrid.style.display = 'none';
+    if (formulasView) formulasView.style.display = 'none';
+    if (calculatorView) calculatorView.style.display = 'none';
+
+    // Testlarni render qilish
+    if (typeof renderTests === 'function') {
+        renderTests();
+        console.log('✅ Tests rendered in showTestsView()');
+    } else {
+        console.warn('⚠️ renderTests function not found');
+    }
+}
+
+// ============================================================
+// SUBJECT VIEW
+// ============================================================
 function showSubject(subjectKey) {
     currentSubject = subjectKey;
     currentTopic = null;
@@ -889,7 +915,6 @@ function claimMission(missionId) {
     const user = getCurrentUser();
     if (user) {
         const title = isOwner(user) ? 'title-owner' : mission.reward;
-        // Update user title via API
         apiRequest(`/users/${user.id}/title`, {
             method: 'PUT',
             body: JSON.stringify({ title })
@@ -966,17 +991,6 @@ function showRandomFormula() {
 }
 
 // ============================================================
-// TESTS
-// ============================================================
-function renderTests() {
-    // tests.js da mavjud
-}
-
-function startSubjectTest(subject) {
-    // tests.js da mavjud
-}
-
-// ============================================================
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -1014,10 +1028,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (logoutBtn) logoutBtn.style.display = 'flex';
     }
     
-    // Testlarni yuklash
-    if (typeof renderTests === 'function') {
-        renderTests();
-    }
+    // Testlarni yuklash (agar tests.js yuklangan bo'lsa)
+    setTimeout(function() {
+        if (typeof renderTests === 'function') {
+            // Testlarni faqat testsView ko'rinadigan bo'lsa render qilish
+            const testsView = document.getElementById('testsView');
+            if (testsView && testsView.style.display !== 'none') {
+                renderTests();
+            }
+            console.log('✅ Tests render ready');
+        } else {
+            console.warn('⚠️ renderTests function not found');
+        }
+    }, 500);
 });
 
 // ============================================================
