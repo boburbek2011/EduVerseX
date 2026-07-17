@@ -1,5 +1,5 @@
 // ============================================================
-// DATABASE.JS - SQLite (RENDERGA MOSLANGAN)
+// DATABASE.JS - SQLite (RENDERGA MOSLANGAN) - TUZATILGAN
 // ============================================================
 
 const sqlite3 = require('sqlite3').verbose();
@@ -145,7 +145,7 @@ function initDatabase(dbPath) {
   });
 
   // ============================================================
-  // HELPER FUNCTIONS
+  // HELPER FUNCTIONS - EKSPORT QILINADI
   // ============================================================
 
   function runQuery(sql, params = []) {
@@ -175,6 +175,9 @@ function initDatabase(dbPath) {
     });
   }
 
+  // ============================================================
+  // RETURN - BU MUHIM!
+  // ============================================================
   return {
     db,
     runQuery,
